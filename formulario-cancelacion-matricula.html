@@ -131,8 +131,10 @@
 
   /* ---------- Tabla asignaturas ---------- */
   .table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:3px;}
-  table{width:100%;border-collapse:collapse;min-width:640px;}
-  thead th{background:var(--navy-700);color:#fff;font-size:12.5px;font-weight:600;text-align:left;padding:11px 12px;white-space:nowrap;border-right:1px solid rgba(255,255,255,.14);}
+  .table-scroll.has-error{border-color:var(--accent);}
+  table{width:100%;border-collapse:collapse;min-width:640px;table-layout:fixed;}
+  thead th{background:var(--navy-700);color:#fff;font-size:12.5px;font-weight:600;text-align:center;padding:11px 12px;white-space:nowrap;border-right:1px solid rgba(255,255,255,.14);}
+  thead th.num{text-align:center;}
   thead th:last-child{border-right:0;}
   tbody td{padding:11px 12px;font-size:12.8px;border-bottom:1px solid var(--line-soft);border-right:1px solid var(--line-soft);}
   tbody td:last-child{border-right:0;}
@@ -144,13 +146,15 @@
   .tbl-input:focus{outline:none;box-shadow:0 0 0 2px #B9C7EE;}
   .asig-view{display:block;padding:5px 7px;color:var(--text);}
   .asig-acciones{white-space:nowrap;}
-  .asig-btns{display:flex;gap:6px;justify-content:flex-end;}
+  .asig-btns{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;}
   .icon-btn{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:#fff;border-radius:3px;padding:6px 10px;font-size:12px;font-weight:600;font-family:inherit;color:var(--navy-ink);cursor:pointer;}
   .icon-btn:hover{background:var(--panel);}
   .icon-btn-ok{border-color:#BFE6D2;color:#1F6B4A;background:#E4F5EC;}
   .icon-btn-ok:hover{background:#D6EEE0;}
   .icon-btn-danger{border-color:#F0C4BF;color:#8A2C22;}
   .icon-btn-danger:hover{background:#FBE9E7;}
+  .icon-btn-add{border-color:#C6D6F5;color:var(--navy-700);}
+  .icon-btn-add:hover{background:#EAF0FE;}
   .tbl-empty{text-align:center;color:var(--muted);font-size:12.8px;padding:22px 12px;}
   .cod{font-weight:600;color:var(--navy-ink);white-space:nowrap;}
 
@@ -416,15 +420,12 @@ const SESION = {
 /* Origen en la implementación definitiva: registro académico (SIMCA) */
 const MATRICULA = {
   periodoAcademico:'2026-2',
-  ultimoDiaDeClases:'2026-11-27',
-  asignaturas:[
-    {codigo:'TEL-3204', nombre:'Comunicaciones Digitales',        creditos:4, faltas:2, nota:3.8},
-    {codigo:'TEL-3311', nombre:'Redes de Computadores',           creditos:4, faltas:6, nota:2.6},
-    {codigo:'ELE-3108', nombre:'Procesamiento Digital de Señales', creditos:3, faltas:0, nota:4.1},
-    {codigo:'ELE-3220', nombre:'Electrónica de Potencia',          creditos:3, faltas:1, nota:3.4},
-    {codigo:'HUM-1105', nombre:'Ética y Sociedad',                 creditos:2, faltas:3, nota:3.0}
-  ]
+  ultimoDiaDeClases:'2026-11-27'
 };
+
+/* Asignaturas matriculadas en el periodo. Empieza vacío: el estudiante agrega
+   manualmente el código y el nombre de cada una con "Agregar asignatura". */
+MATRICULA.asignaturas = [];
 
 /* Vacío = el estudiante puede radicar. Un elemento = bloqueo por duplicado. */
 let SOLICITUDES_EN_CURSO = [];
@@ -624,6 +625,9 @@ function erroresPaso(n){
       }
     });
   }
+  if(n === 4 && !MODO_PRUEBA_SIN_ARCHIVOS){
+    if(MATRICULA.asignaturas.length === 0) e.push({campo:'asignaturas', msg:'Debes agregar al menos una asignatura matriculada.'});
+  }
   if(n === 5){
     if(!state.declara) e.push({campo:'declara', msg:'Debe aceptar la declaración de veracidad para radicar la solicitud.'});
   }
@@ -696,48 +700,63 @@ function renderPaso2(){
 
 function renderPaso3(){
   const a = MATRICULA.asignaturas;
+  const errs = state.touched[4] ? erroresPaso(4) : [];
+  const errGeneral = errs.find(x => x.campo === 'asignaturas');
   const iconEditar = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`;
   const iconGuardar = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 7"/></svg>`;
   const iconEliminar = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>`;
+  const iconAgregar = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>`;
   return `
     <h2 class="paso-title">Asignaturas del periodo</h2>
-    <p class="paso-intro">Ingresa el código y el nombre de cada asignatura que tienes matriculada en el periodo ${MATRICULA.periodoAcademico}. La cancelación de matrícula las cubre en su totalidad, por lo que no se seleccionan individualmente. Si te equivocas al escribir una asignatura, usa "Editar" para corregirla o "Eliminar" para quitarla de la lista.</p>
+    <p class="paso-intro">Agrega el código y el nombre de cada asignatura que tienes matriculada en el periodo ${MATRICULA.periodoAcademico}. La cancelación de matrícula las cubre en su totalidad, por lo que no se seleccionan individualmente. Usa "Editar" para corregir una asignatura ya agregada o "Eliminar" para quitarla de la lista.</p>
 
-    <div class="table-scroll">
-      <table>
-        <thead>
-          <tr>
-            <th>Código</th><th>Asignatura</th><th class="num">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${a.map((x,i) => {
-            const editando = state.asigEditando.has(i);
-            return `<tr>
-            <td class="cod">${editando
-              ? `<input type="text" class="tbl-input" data-asig-codigo="${i}" value="${esc(x.codigo)}" placeholder="Ej. TEL-3204">`
-              : `<span class="asig-view">${esc(x.codigo) || '—'}</span>`}</td>
-            <td>${editando
-              ? `<input type="text" class="tbl-input" data-asig-nombre="${i}" value="${esc(x.nombre)}" placeholder="Nombre de la asignatura">`
-              : `<span class="asig-view">${esc(x.nombre) || '—'}</span>`}</td>
-            <td class="num asig-acciones">
-              <div class="asig-btns">
-                ${editando
-                  ? `<button type="button" class="icon-btn icon-btn-ok" data-asig-guardar="${i}">${iconGuardar}Guardar</button>`
-                  : `<button type="button" class="icon-btn" data-asig-editar="${i}">${iconEditar}Editar</button>`}
-                <button type="button" class="icon-btn icon-btn-danger" data-asig-eliminar="${i}">${iconEliminar}Eliminar</button>
-              </div>
-            </td>
-          </tr>`;
-          }).join('')}
-          ${a.length === 0 ? `<tr><td colspan="3" class="tbl-empty">No has agregado ninguna asignatura.</td></tr>` : ''}
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colspan="3">${a.length} asignatura${a.length === 1 ? '' : 's'} matriculada${a.length === 1 ? '' : 's'}</td>
-          </tr>
-        </tfoot>
-      </table>
+    <div id="asigSeccion">
+      <div style="margin-bottom:12px;">
+        <button type="button" class="icon-btn icon-btn-add" id="btnAgregarAsig">${iconAgregar}Agregar asignatura</button>
+      </div>
+
+      <div class="table-scroll${errGeneral ? ' has-error' : ''}">
+        <table>
+          <colgroup>
+            <col style="width:25%;">
+            <col style="width:50%;">
+            <col style="width:25%;">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Código</th><th>Asignatura</th><th class="num">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${a.map((x,i) => {
+              const editando = state.asigEditando.has(i);
+              return `<tr>
+              <td class="cod">${editando
+                ? `<input type="text" class="tbl-input" data-asig-codigo="${i}" value="${esc(x.codigo)}" placeholder="Ej. TEL-3204" autofocus>`
+                : `<span class="asig-view">${esc(x.codigo) || '—'}</span>`}</td>
+              <td>${editando
+                ? `<input type="text" class="tbl-input" data-asig-nombre="${i}" value="${esc(x.nombre)}" placeholder="Nombre de la asignatura">`
+                : `<span class="asig-view">${esc(x.nombre) || '—'}</span>`}</td>
+              <td class="num asig-acciones">
+                <div class="asig-btns">
+                  ${editando
+                    ? `<button type="button" class="icon-btn icon-btn-ok" data-asig-guardar="${i}">${iconGuardar}Guardar</button>`
+                    : `<button type="button" class="icon-btn" data-asig-editar="${i}">${iconEditar}Editar</button>`}
+                  <button type="button" class="icon-btn icon-btn-danger" data-asig-eliminar="${i}">${iconEliminar}Eliminar</button>
+                </div>
+              </td>
+            </tr>`;
+            }).join('')}
+            ${a.length === 0 ? `<tr><td colspan="3" class="tbl-empty">Aún no has agregado ninguna asignatura matriculada. Usa el botón "Agregar asignatura" para comenzar.</td></tr>` : ''}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3">${a.length} asignatura${a.length === 1 ? '' : 's'} matriculada${a.length === 1 ? '' : 's'}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div class="err" style="${errGeneral ? 'display:block;margin-top:8px;' : ''}">${errGeneral ? esc(errGeneral.msg) : ''}</div>
     </div>
 
     <p class="foot-note">El Decano determinará mediante resolución motivada cuáles asignaturas quedan aprobadas, perdidas o no cursadas.</p>`;
@@ -932,6 +951,14 @@ function enlazarPaso(){
     $('soporteSlot').innerHTML = fileOkHTML(state.soporte,'soporte');
   });
 
+  // Paso 3 — asignaturas del periodo: agregar
+  const btnAgregarAsig = $('btnAgregarAsig');
+  if(btnAgregarAsig) btnAgregarAsig.addEventListener('click', () => {
+    MATRICULA.asignaturas.push({codigo:'', nombre:''});
+    state.asigEditando.add(MATRICULA.asignaturas.length - 1);
+    render();
+  });
+
   // Paso 3 — asignaturas: editar código/nombre
   document.querySelectorAll('[data-asig-codigo]').forEach(inp => {
     inp.addEventListener('input', e => {
@@ -1052,6 +1079,7 @@ function scrollAlPrimerError(n){
   let id = null;
   if(err.campo === 'declara') id = 'declBox';
   else if(err.campo === 'descripcion') id = 'fDesc';
+  else if(err.campo === 'asignaturas') id = 'asigSeccion';
   else if(err.campo.startsWith('doc')) id = 'docBox' + err.campo.slice(3);
   const el = id && $(id);
   if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
