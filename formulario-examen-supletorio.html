@@ -1,0 +1,1391 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Examen Supletorio — Gestión de Procesos Académicos FIET</title>
+<style>
+  :root{
+    --navy-900:#1B2660;
+    --navy-800:#232F6E;
+    --navy-700:#2A3A86;
+    --navy-ink:#1F2A6D;
+    --accent:#B23B2E;
+    --link:#2F6FD0;
+    --amber:#E0952B;
+    --state-blue:#3B6FD4;
+    --green:#2E9E6B;
+    --red:#D0463B;
+    --panel:#F4F5F8;
+    --line:#E3E6EC;
+    --line-soft:#EDEFF3;
+    --text:#2C3038;
+    --muted:#6E7480;
+    --zebra:#FAFBFC;
+    --sidebar-w:210px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"Segoe UI","Nunito Sans",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+    color:var(--text);background:#fff;font-size:14px;-webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit;}
+
+  /* ---------- Layout ---------- */
+  .app{display:flex;min-height:100vh;}
+  .sidebar{width:var(--sidebar-w);flex:0 0 var(--sidebar-w);background:var(--navy-900);display:flex;flex-direction:column;}
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+
+  /* ---------- Sidebar ---------- */
+  .crest{height:112px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(255,255,255,.10);}
+  .crest img{display:block;object-fit:contain;}
+  .crest .crest-fallback{display:none;color:#fff;font-size:12px;font-weight:700;letter-spacing:.5px;text-align:center;line-height:1.5;opacity:.9;}
+  .nav{padding:22px 0 0 0;}
+  .nav-item{
+    width:100%;display:flex;align-items:center;gap:11px;padding:11px 16px;
+    background:none;border:0;cursor:pointer;color:#EDEFF6;font-size:13.5px;
+    text-align:left;border-left:3px solid transparent;text-decoration:none;
+  }
+  .nav-item:hover{background:rgba(255,255,255,.07);}
+  .nav-item.is-active{background:rgba(255,255,255,.11);border-left-color:#fff;font-weight:600;}
+  .nav-item .bar{opacity:.55;}
+  .nav-item:focus-visible{outline:2px solid #9FB6FF;outline-offset:-2px;}
+
+  /* ---------- Topbar ---------- */
+  .topbar{height:82px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;border-bottom:1px solid var(--line);background:#fff;}
+  .app-title{font-size:19px;font-weight:700;color:var(--navy-ink);letter-spacing:.1px;margin:0;}
+  .user-chip{position:relative;display:flex;align-items:center;}
+  .user-chip-btn{display:flex;align-items:center;gap:11px;background:none;border:0;cursor:pointer;padding:6px 8px;border-radius:5px;font-family:inherit;}
+  .user-chip-btn:hover{background:var(--panel);}
+  .avatar{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--navy-ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12.5px;color:var(--navy-ink);}
+  .user-meta{line-height:1.35;text-align:left;}
+  .user-name{font-weight:700;font-size:13px;color:var(--navy-ink);}
+  .user-role{font-size:12.5px;color:var(--navy-ink);display:flex;align-items:center;gap:5px;}
+  .user-chip-btn[aria-expanded="true"] .user-role svg{transform:rotate(180deg);}
+  .user-dropdown{position:absolute;top:calc(100% + 6px);right:0;min-width:190px;background:#fff;border:1px solid var(--line);border-radius:5px;box-shadow:0 12px 28px rgba(20,26,56,.2);padding:6px;z-index:60;}
+  .user-dropdown-item{width:100%;display:flex;align-items:center;gap:10px;background:none;border:0;padding:10px 11px;border-radius:3px;font-size:13px;font-weight:600;color:var(--red);cursor:pointer;text-align:left;font-family:inherit;}
+  .user-dropdown-item:hover{background:#FBE9E7;}
+
+  /* ---------- Content ---------- */
+  .content{flex:1;padding:16px 26px 0;}
+  .crumbs{font-size:12.5px;color:var(--muted);margin-bottom:22px;}
+  .crumbs b{color:var(--navy-ink);font-weight:600;}
+  .crumbs a{color:var(--navy-ink);font-weight:600;text-decoration:none;}
+  .crumbs a:hover{text-decoration:underline;}
+  .crumbs span{margin:0 7px;color:var(--navy-ink);font-weight:700;}
+  .section-tab{display:inline-block;font-size:15px;font-weight:600;color:var(--navy-ink);padding-bottom:7px;border-bottom:3px solid var(--accent);margin-bottom:26px;}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:3px;box-shadow:0 1px 3px rgba(27,38,96,.06);max-width:1020px;margin:0 auto 26px;}
+  .card-head{display:flex;align-items:center;gap:10px;padding:15px 18px;border-bottom:1px solid var(--line-soft);}
+  .card-head h2{margin:0;font-size:15px;font-weight:700;color:var(--navy-ink);}
+  .card-body{padding:20px 22px;}
+
+  /* ---------- Stepper ---------- */
+  .stepper{display:flex;max-width:1020px;margin:0 auto 22px;background:#fff;border:1px solid var(--line);border-radius:3px;box-shadow:0 1px 3px rgba(27,38,96,.06);padding:18px 14px 14px;}
+  .step{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;position:relative;background:none;border:0;cursor:default;padding:0 4px;font-family:inherit;}
+  .step.clickable{cursor:pointer;}
+  .step::after{content:'';position:absolute;top:15px;left:calc(50% + 20px);right:calc(-50% + 20px);height:2px;background:var(--line);}
+  .step:last-child::after{display:none;}
+  .step.is-done::after{background:var(--green);}
+  .step-num{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;background:#fff;border:2px solid var(--line);color:#A9AFBB;position:relative;z-index:1;}
+  .step-label{font-size:11.5px;font-weight:600;color:var(--muted);text-align:center;line-height:1.35;}
+  .step.is-current .step-num{background:var(--navy-700);border-color:var(--navy-700);color:#fff;}
+  .step.is-current .step-label{color:var(--navy-ink);font-weight:700;}
+  .step.is-done .step-num{background:var(--green);border-color:var(--green);color:#fff;}
+  .step.is-done .step-label{color:var(--navy-ink);}
+  .step.is-error .step-num{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .step.is-error .step-label{color:var(--accent);}
+  .step:focus-visible{outline:2px solid #B9C7EE;outline-offset:2px;border-radius:3px;}
+
+  /* ---------- Form ---------- */
+  .paso-title{margin:0 0 4px;font-size:16px;font-weight:700;color:var(--navy-ink);}
+  .paso-intro{margin:0 0 20px;font-size:13px;color:var(--muted);line-height:1.6;}
+  .subhead{margin:26px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line-soft);font-size:12.5px;font-weight:700;color:var(--navy-ink);text-transform:uppercase;letter-spacing:.5px;}
+  .subhead:first-child{margin-top:0;}
+  .subhead small{display:block;text-transform:none;letter-spacing:0;font-weight:600;color:var(--muted);font-size:12px;margin-top:5px;}
+  .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px 20px;}
+  .grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px 20px;}
+  .fld{display:flex;flex-direction:column;gap:6px;}
+  .fld.wide{grid-column:1 / -1;}
+  .fld label{font-size:12.5px;font-weight:600;color:var(--navy-ink);}
+  .req{color:var(--accent);}
+  .fld input[type=text],.fld input[type=tel],.fld input[type=date],.fld input[type=time],.fld select,.fld textarea{
+    border:1px solid var(--line);border-radius:3px;padding:9px 11px;font-size:13px;
+    color:var(--text);background:#fff;font-family:inherit;width:100%;
+  }
+  .fld input:focus,.fld select:focus,.fld textarea:focus{
+    outline:2px solid #B9C7EE;outline-offset:0;border-color:var(--navy-700);
+  }
+  .fld textarea{resize:vertical;min-height:120px;line-height:1.6;}
+  .fld .hint{font-size:11.8px;color:var(--muted);line-height:1.5;}
+  .fld.readonly input{background:var(--panel);color:var(--muted);cursor:not-allowed;}
+  .fld.has-error input,.fld.has-error select,.fld.has-error textarea{border-color:var(--accent);background:#FFF7F6;}
+  .err{font-size:12px;color:var(--accent);font-weight:600;display:none;}
+  .fld.has-error .err{display:block;}
+  .counter{font-size:11.5px;color:var(--muted);text-align:right;}
+  .counter.bad{color:var(--accent);font-weight:700;}
+  .foot-note{margin:18px 0 0;font-size:12px;color:var(--muted);background:var(--panel);border-radius:3px;padding:11px 13px;line-height:1.6;}
+
+  /* ---------- Alertas ---------- */
+  .alert{display:flex;gap:11px;align-items:flex-start;border-radius:3px;padding:12px 14px;font-size:12.8px;line-height:1.6;margin-bottom:16px;}
+  .alert svg{flex:0 0 auto;margin-top:1px;}
+  .alert b{display:block;margin-bottom:2px;}
+  .alert-warn{background:#FFF8E9;border:1px solid #F0DEB4;color:#7A5B1B;}
+  .alert-danger{background:#FBE9E7;border:1px solid #F0C4BF;color:#8A2C22;}
+  .alert-info{background:#EAF0FE;border:1px solid #C6D6F5;color:#25407E;}
+
+  /* ---------- Selector de examen / causa (tarjetas seleccionables) ---------- */
+  .pick{display:flex;flex-direction:column;gap:10px;}
+  .pick.has-error .pick-item{border-color:#F0C4BF;}
+  .pick-item{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:3px;padding:13px 15px;cursor:pointer;background:#fff;text-align:left;width:100%;font-family:inherit;}
+  .pick-item:hover:not(.is-disabled){border-color:var(--navy-700);background:#FBFCFE;}
+  .pick-item:focus-within{outline:2px solid #B9C7EE;outline-offset:1px;}
+  .pick-item.is-selected{border-color:var(--navy-700);background:#F4F6FB;box-shadow:inset 3px 0 0 var(--navy-700);}
+  .pick-item.is-disabled{opacity:.62;cursor:not-allowed;background:var(--zebra);}
+  .pick-item input[type=radio]{margin-top:3px;width:16px;height:16px;flex:0 0 auto;accent-color:var(--navy-700);}
+  .pick-body{flex:1;min-width:0;}
+  .pick-title{font-size:13.5px;font-weight:700;color:var(--navy-ink);line-height:1.4;}
+  .pick-meta{font-size:12.3px;color:var(--muted);line-height:1.7;margin-top:3px;}
+  .pick-meta b{color:var(--text);font-weight:600;}
+  .pick-desc{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:4px;}
+  .pick-empty{border:1px dashed #C3CAD9;border-radius:3px;padding:26px 18px;text-align:center;color:var(--muted);font-size:12.8px;line-height:1.7;background:var(--zebra);}
+  .pick-empty b{display:block;color:var(--navy-ink);font-size:13.5px;margin-bottom:5px;}
+
+  /* ---------- Chips de plazo ---------- */
+  .vig{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;padding:5px 10px;border-radius:20px;margin-top:8px;}
+  .vig-dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto;}
+  .vig-ok{background:#E4F5EC;color:#1F6B4A;} .vig-ok .vig-dot{background:var(--green);}
+  .vig-warn{background:#FDF3E3;color:#8A6218;} .vig-warn .vig-dot{background:var(--amber);}
+  .vig-bad{background:#FBE9E7;color:#8A2C22;} .vig-bad .vig-dot{background:var(--red);}
+
+  /* ---------- Resumen del examen elegido ---------- */
+  .resumen{border:1px solid #C6D6F5;background:#F7F9FE;border-radius:3px;padding:15px 17px;}
+  .resumen .dl{grid-template-columns:190px 1fr;font-size:12.8px;}
+
+  /* ---------- Adjunto ---------- */
+  .upload-zone{display:flex;flex-direction:column;align-items:center;gap:7px;border:1.5px dashed #C3CAD9;border-radius:3px;padding:20px 14px;cursor:pointer;text-align:center;background:#FBFCFE;width:100%;font-family:inherit;color:inherit;}
+  .upload-zone:hover{border-color:var(--navy-700);background:#F4F6FB;}
+  .upload-zone:focus-visible{outline:2px solid #B9C7EE;outline-offset:2px;}
+  .upload-zone span{font-size:12px;color:var(--muted);line-height:1.5;}
+  .upload-zone b{color:var(--navy-ink);}
+  .adj.has-error .upload-zone{border-color:var(--accent);background:#FFF7F6;}
+  .file-ok{display:flex;align-items:center;gap:9px;background:#E4F5EC;border:1px solid #BFE6D2;border-radius:3px;padding:10px 12px;font-size:12.5px;color:#1F6B4A;}
+  .file-ok .fname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;}
+  .link-btn{background:none;border:0;color:var(--link);font-size:12.3px;font-weight:600;cursor:pointer;padding:0;font-family:inherit;}
+  .link-btn:hover{text-decoration:underline;}
+  .link-btn:focus-visible{outline:2px solid #B9C7EE;outline-offset:2px;border-radius:2px;}
+
+  /* ---------- Revisión ---------- */
+  .rev{border:1px solid var(--line);border-radius:3px;margin-bottom:14px;}
+  .rev-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;background:var(--panel);border-bottom:1px solid var(--line);}
+  .rev-head h3{margin:0;font-size:12.5px;font-weight:700;color:var(--navy-ink);text-transform:uppercase;letter-spacing:.5px;}
+  .rev-body{padding:14px;}
+  .dl{display:grid;grid-template-columns:200px 1fr;gap:9px 14px;font-size:13px;}
+  .dl dt{color:var(--muted);font-weight:600;}
+  .dl dd{margin:0;color:var(--text);}
+  .just{background:var(--panel);border-left:3px solid var(--navy-700);padding:11px 13px;font-size:13px;line-height:1.6;border-radius:0 3px 3px 0;}
+  .lista-docs{list-style:none;margin:0;padding:0;}
+  .lista-docs li{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--line-soft);font-size:12.8px;}
+  .lista-docs li:last-child{border-bottom:0;}
+  .check{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:3px;padding:14px;font-size:13px;line-height:1.6;}
+  .check.has-error{border-color:var(--accent);background:#FFF7F6;}
+  .check input{margin-top:2px;width:16px;height:16px;flex:0 0 auto;accent-color:var(--navy-700);}
+
+  /* ---------- Acciones ---------- */
+  .acciones{display:flex;justify-content:space-between;gap:12px;padding:16px 22px;border-top:1px solid var(--line-soft);background:#FCFCFD;flex-wrap:wrap;}
+  .btn{height:38px;padding:0 18px;border-radius:3px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid transparent;display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-family:inherit;}
+  .btn-ghost{background:#fff;border-color:#B7BCC6;color:var(--navy-ink);}
+  .btn-ghost:hover{background:#EEF1F9;border-color:var(--navy-700);}
+  .btn-primary{background:var(--navy-700);color:#fff;}
+  .btn-primary:hover{background:#31439B;}
+  .btn-danger{background:var(--accent);color:#fff;}
+  .btn-danger:hover{background:#9B3327;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .btn:focus-visible{outline:2px solid #B9C7EE;outline-offset:2px;}
+
+  /* ---------- Confirmación ---------- */
+  .ok-wrap{max-width:660px;margin:0 auto;text-align:center;padding:44px 26px 40px;}
+  .ok-icon{width:66px;height:66px;border-radius:50%;background:#E4F5EC;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;}
+  .ok-wrap h2{margin:0 0 8px;font-size:19px;color:var(--navy-ink);}
+  .ok-wrap > p{margin:0 auto 24px;font-size:13.5px;color:var(--muted);line-height:1.65;max-width:480px;}
+  .ok-box{border:1px solid var(--line);border-radius:3px;text-align:left;margin-bottom:20px;}
+  .ok-box .dl{padding:16px;grid-template-columns:190px 1fr;}
+  .rad-big{font-size:15px;font-weight:700;color:var(--navy-ink);font-variant-numeric:tabular-nums;letter-spacing:.4px;}
+  .chip-estado{display:inline-block;padding:4px 11px;border-radius:20px;font-size:12px;font-weight:700;background:#EAF0FE;color:var(--state-blue);}
+
+  /* ---------- Modal de confirmación ---------- */
+  .modal-bg{position:fixed;inset:0;background:rgba(20,26,56,.45);display:flex;align-items:center;justify-content:center;z-index:120;padding:20px;}
+  .modal{background:#fff;border-radius:5px;box-shadow:0 20px 50px rgba(20,26,56,.35);max-width:440px;width:100%;}
+  .modal-body{padding:22px 24px 18px;}
+  .modal-body h3{margin:0 0 8px;font-size:15.5px;color:var(--navy-ink);}
+  .modal-body p{margin:0;font-size:13px;color:var(--muted);line-height:1.65;}
+  .modal-acciones{display:flex;justify-content:flex-end;gap:10px;padding:14px 24px 20px;}
+
+  /* ---------- Spinner ---------- */
+  .spin{width:15px;height:15px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;}
+  @keyframes sp{to{transform:rotate(360deg);}}
+
+  /* ---------- Footer ---------- */
+  footer{border-top:1px solid var(--line);padding:18px 26px 22px;text-align:center;font-size:11.5px;color:var(--muted);line-height:1.9;background:#fff;}
+
+  /* ---------- Toast ---------- */
+  .toast{position:fixed;right:22px;bottom:22px;max-width:380px;z-index:100;background:#1B2660;color:#fff;border-radius:6px;border-left:5px solid var(--green);box-shadow:0 14px 34px rgba(20,26,56,.4);padding:15px 18px;display:flex;gap:12px;align-items:flex-start;opacity:0;transform:translateY(10px) scale(.98);pointer-events:none;transition:opacity .22s ease,transform .22s ease;}
+  .toast.show{opacity:1;transform:translateY(0) scale(1);}
+  .toast.is-error{border-left-color:var(--red);}
+  .toast-icon{flex:0 0 auto;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-top:1px;background:var(--green);}
+  .toast.is-error .toast-icon{background:var(--red);}
+  .toast-text{font-size:13.2px;line-height:1.6;}
+
+  @media (max-width:860px){
+    :root{--sidebar-w:64px;}
+    .nav-item span.label{display:none;}
+    .nav-item{justify-content:center;padding:13px 0;}
+    .nav-item .bar{display:none;}
+    .app-title{font-size:15px;}
+    .step-label{display:none;}
+    .dl,.resumen .dl,.ok-box .dl{grid-template-columns:1fr;gap:3px 0;}
+    .dl dd{margin-bottom:8px;}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <div class="crest">
+      <img src="img/escudo.png" width="90" height="90" alt="Escudo Universidad del Cauca"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <div class="crest-fallback">UNIVERSIDAD<br>DEL CAUCA</div>
+    </div>
+    <nav class="nav" aria-label="Navegación principal">
+      <a class="nav-item" href="estudiante.html" title="Mi usuario" aria-label="Mi usuario">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3"/><path d="M6.5 19a6 6 0 0 1 11 0"/></svg>
+        <span class="bar" aria-hidden="true">|</span><span class="label">Mi usuario</span>
+      </a>
+      <a class="nav-item is-active" href="estudiante.html" title="Solicitudes" aria-label="Solicitudes" aria-current="page">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
+        <span class="bar" aria-hidden="true">|</span><span class="label">Solicitudes</span>
+      </a>
+      <a class="nav-item" href="estudiante.html#respuestas" title="Respuestas" aria-label="Respuestas">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4 4l16 8-16 8 3-8-3-8z"/></svg>
+        <span class="bar" aria-hidden="true">|</span><span class="label">Respuestas</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- ===================== MAIN ===================== -->
+  <div class="main">
+    <header class="topbar">
+      <h1 class="app-title">Gestión de Procesos Académicos FIET</h1>
+      <div class="user-chip">
+        <button class="user-chip-btn" id="userMenuBtn" aria-haspopup="true" aria-expanded="false">
+          <div class="avatar" aria-hidden="true">NS</div>
+          <div class="user-meta">
+            <div class="user-name">Nicolás Salazar</div>
+            <div class="user-role">Estudiante
+              <svg width="9" height="6" viewBox="0 0 10 6" fill="none" stroke="#1F2A6D" stroke-width="1.5" aria-hidden="true"><path d="M1 1l4 4 4-4"/></svg>
+            </div>
+          </div>
+        </button>
+        <div class="user-dropdown" id="userDropdown" hidden>
+          <button class="user-dropdown-item" id="btnLogout" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B23B2E" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="crumbs">
+        <b>Estudiante</b><span>&gt;</span><a href="estudiante.html">Solicitudes</a><span>&gt;</span><b>Examen Supletorio</b>
+      </div>
+      <div class="section-tab">Examen Supletorio</div>
+
+      <!-- ===================== PASO 0: VERIFICACIÓN DE PROCEDENCIA ===================== -->
+      <section id="gate">
+        <div class="card" style="max-width:760px;">
+          <div class="card-head">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2A3A86" stroke-width="1.6" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 7.9-8 9-4.8-1.1-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg>
+            <h2>Verificación de procedencia</h2>
+          </div>
+          <div class="card-body">
+            <p class="paso-intro" style="margin-bottom:18px;">Antes de diligenciar la solicitud, la aplicación verifica que el trámite proceda para tu situación actual.</p>
+            <div id="gateAlerts"></div>
+            <div id="gateOk" class="alert alert-info" hidden>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#25407E" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01" stroke-linecap="round"/></svg>
+              <div><b>El trámite procede</b>Puedes continuar con la solicitud. El examen supletorio se solicita <b style="display:inline;">a más tardar tres días hábiles</b> después de la fecha del examen al que no concurriste, por lo que el plazo se cuenta por separado para cada examen.</div>
+            </div>
+
+            <div class="subhead">Documentos que debes descargar y hacer firmar
+              <small>Necesitas estos formatos firmados por el o los docentes para adjuntarlos en el formulario. Puedes descargarlos desde ya y tenerlos listos antes de continuar.</small>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="border:1px solid var(--line);border-radius:3px;padding:13px 15px;display:flex;gap:12px;align-items:flex-start;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6E7480" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto;margin-top:1px;"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-weight:700;font-size:13px;color:var(--navy-ink);">Formato del docente que orienta la asignatura</div>
+                  <div style="font-size:12.3px;color:var(--muted);margin-top:3px;line-height:1.6;">Obligatorio para toda solicitud. Debe firmarlo el docente de la asignatura del examen al que no concurriste, como constancia de que acordó contigo la nueva fecha del supletorio.</div>
+                  <button type="button" class="link-btn" id="btnDescargarFirmaGate" style="margin-top:9px;display:inline-flex;align-items:center;gap:7px;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+                    Descargar formato
+                  </button>
+                </div>
+              </div>
+              <div style="border:1px solid var(--line);border-radius:3px;padding:13px 15px;display:flex;gap:12px;align-items:flex-start;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6E7480" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto;margin-top:1px;"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-weight:700;font-size:13px;color:var(--navy-ink);">Formato del docente de la asignatura con la que se presenta el cruce</div>
+                  <div style="font-size:12.3px;color:var(--muted);margin-top:3px;line-height:1.6;">Solo aplica si tu causa para no presentar el examen fue un cruce con el examen de otra asignatura. Debe firmarlo el docente de esa otra asignatura.</div>
+                  <button type="button" class="link-btn" id="btnDescargarFirmaCruceGate" style="margin-top:9px;display:inline-flex;align-items:center;gap:7px;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+                    Descargar formato
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="acciones">
+            <a class="btn btn-ghost" href="estudiante.html">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1F2A6D" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+              Volver al catálogo
+            </a>
+            <button class="btn btn-primary" id="btnGate">
+              Continuar
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== FORMULARIO ===================== -->
+      <section id="form" hidden>
+
+        <div class="stepper" id="stepper">
+          <button class="step" data-step="1" type="button"><span class="step-num">1</span><span class="step-label">Información del solicitante</span></button>
+          <button class="step" data-step="2" type="button"><span class="step-num">2</span><span class="step-label">Examen y programación</span></button>
+          <button class="step" data-step="3" type="button"><span class="step-num">3</span><span class="step-label">Revisión y envío</span></button>
+        </div>
+
+        <div class="card">
+          <div class="card-body" id="pasoBody"></div>
+          <div class="acciones">
+            <button class="btn btn-ghost" id="btnAtras" type="button">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1F2A6D" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+              <span id="btnAtrasTxt">Atrás</span>
+            </button>
+            <button class="btn btn-primary" id="btnAdelante" type="button">
+              <span id="btnAdelanteTxt">Continuar</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" id="btnAdelanteIcon" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== CONFIRMACIÓN ===================== -->
+      <section id="done" hidden>
+        <div class="card">
+          <div class="ok-wrap">
+            <div class="ok-icon">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#2E9E6B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5.5 5.5L20 7"/></svg>
+            </div>
+            <h2>Solicitud radicada correctamente</h2>
+            <p>Tu solicitud de Examen Supletorio fue recibida y quedó en manos del Funcionario Académico. Podrás seguir su avance en el módulo de Respuestas.</p>
+            <div class="ok-box">
+              <dl class="dl">
+                <dt>Número de radicado</dt><dd><span class="rad-big" id="okRad"></span></dd>
+                <dt>Tipo de proceso académico</dt><dd>Examen Supletorio</dd>
+                <dt>Asignatura</dt><dd id="okAsig"></dd>
+                <dt>Fecha de radicación</dt><dd id="okFecha"></dd>
+                <dt>Estado actual</dt><dd><span class="chip-estado">En Gestión</span></dd>
+              </dl>
+            </div>
+            <div class="alert alert-info" style="text-align:left;margin-bottom:22px;">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#25407E" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01" stroke-linecap="round"/></svg>
+              <div><b>Qué sigue</b>Si el Decano aprueba tu solicitud, en el módulo de Respuestas encontrarás el recibo de pago de los derechos del examen. Deberás pagarlo y subir el comprobante desde la aplicación: el examen no queda autorizado hasta que el Funcionario Académico verifique ese comprobante.</div>
+            </div>
+            <a class="btn btn-primary" href="estudiante.html#respuestas" style="justify-content:center;">
+              Ir a mis trámites radicados
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <footer>
+      2026 &nbsp;|&nbsp; Gestión de Procesos Académicos FIET &nbsp;|&nbsp; Facultad de Ingeniería Electrónica y Telecomunicaciones<br>
+      División de Tecnologías de la Información y las Comunicaciones &nbsp;|&nbsp; Versión 1.0.0
+    </footer>
+  </div>
+</div>
+
+<!-- ===================== TOAST ===================== -->
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <div class="toast-icon" id="toastIcon">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5.5 5.5L20 7"/></svg>
+  </div>
+  <div class="toast-text" id="toastText"></div>
+</div>
+
+<!-- ===================== MODAL ===================== -->
+<div id="modalSlot"></div>
+
+<script>
+/* =========================================================================
+   DATOS SIMULADOS
+   El prototipo no se integra con ningún sistema externo.
+   ========================================================================= */
+
+/* Origen en la implementación definitiva: sesión del usuario autenticado. */
+const SESION = {
+  nombre:'Nicolás Salazar',
+  codigo:'104620145078',
+  documento:'1004556612',
+  tipoDocumento:'Cédula de Ciudadanía',
+  programa:'Ingeniería de Sistemas',
+  facultad:'Facultad de Ingeniería Electrónica y Telecomunicaciones',
+  periodoCarrera:7,
+  correo:'nsalazar@unicauca.edu.co',
+  telefono:'3184427790'
+};
+
+/* PENDIENTE: convención del número de radicado por confirmar. */
+const RADICADO = '2026-ES-0154';
+const RADICADO_EN_CURSO = '2026-ES-0149';
+
+const MAX_MB = 5;
+const PLAZO_DIAS_HABILES = 3;
+const MIN_DESC = 50;
+const MAX_DESC = 1000;
+
+/* =========================================================================
+   ESTADO
+   ========================================================================= */
+const state = {
+  escenario:'normal',
+  validar:true,
+  paso:1,
+  maxPasoVisto:1,
+  telefono:'',
+  asigNombre:'',
+  asigGrupo:'',
+  asigCodigo:'',
+  fechaNoPresentado:'',
+  fechaPropuesta:'',
+  firmaDocente:null,
+  tipoCausa:'',          // 'cruce' | 'otra'
+  cruceNombre:'',
+  cruceCodigo:'',
+  cruceGrupo:'',
+  cruceFecha:'',
+  cruceHora:'',
+  firmaDocenteCruce:null,
+  descripcion:'',
+  anexo:null,
+  declara:false,
+  touched:{},
+  enviando:false,
+  radicado:false
+};
+
+/* =========================================================================
+   UTILIDADES
+   ========================================================================= */
+const $ = id => document.getElementById(id);
+const hoy = () => { const d = new Date(); d.setHours(0,0,0,0); return d; };
+const isoHoy = () => new Date().toISOString().slice(0,10);
+
+function aFecha(iso){ const [a,m,d] = iso.split('-').map(Number); const f = new Date(a,m-1,d); f.setHours(0,0,0,0); return f; }
+function fmtFecha(iso){ const [a,m,d] = iso.split('-'); return `${d}/${m}/${a}`; }
+function fmtFechaDate(f){ const p = n => String(n).padStart(2,'0'); return `${p(f.getDate())}/${p(f.getMonth()+1)}/${f.getFullYear()}`; }
+function fmtFechaLarga(iso){
+  const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const [a,m,d] = iso.split('-');
+  return `${Number(d)} de ${MESES[Number(m)-1]} de ${a}`;
+}
+function fmtFechaHora(dt){ const p = n => String(n).padStart(2,'0'); return `${p(dt.getDate())}/${p(dt.getMonth()+1)}/${dt.getFullYear()} ${p(dt.getHours())}:${p(dt.getMinutes())}`; }
+function fmtHora(h){
+  if(!h) return '';
+  const [hh,mm] = h.split(':').map(Number);
+  const suf = hh < 12 ? 'a. m.' : 'p. m.';
+  const h12 = hh % 12 === 0 ? 12 : hh % 12;
+  return `${h12}:${String(mm).padStart(2,'0')} ${suf}`;
+}
+function fmtTam(bytes){ return bytes < 1048576 ? `${Math.max(1,Math.round(bytes/1024))} KB` : `${(bytes/1048576).toFixed(1)} MB`; }
+function extDe(nombre){ const p = nombre.split('.'); return p.length > 1 ? p.pop().toLowerCase() : ''; }
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* Suma días hábiles (lunes a viernes) a una fecha. No contempla festivos:
+   PENDIENTE — en la implementación definitiva debe consultarse el calendario
+   de festivos de Colombia. */
+function sumarDiasHabiles(iso, n){
+  const f = aFecha(iso);
+  let c = 0;
+  while(c < n){ f.setDate(f.getDate() + 1); const dw = f.getDay(); if(dw !== 0 && dw !== 6) c++; }
+  return f;
+}
+
+/* Estado del plazo de un examen: ok | ultimo | vencido */
+function plazoDe(iso){
+  const venc = sumarDiasHabiles(iso, PLAZO_DIAS_HABILES);
+  const h = hoy();
+  const dias = Math.round((venc - h) / 86400000);
+  const vencTxt = fmtFechaDate(venc);
+  if(dias < 0)  return {tipo:'vencido', vencTxt, dias};
+  if(dias === 0) return {tipo:'ultimo', vencTxt, dias};
+  return {tipo:'ok', vencTxt, dias};
+}
+
+const debeValidar = () => state.validar;
+
+/* =========================================================================
+   ESCENARIOS DE DEMOSTRACIÓN
+   ========================================================================= */
+function aplicarEscenario(){
+  state.paso = 1;
+  state.maxPasoVisto = 1;
+  state.touched = {};
+  state.radicado = false;
+  $('form').hidden = true;
+  $('done').hidden = true;
+  $('gate').hidden = false;
+  renderGate();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* =========================================================================
+   PASO 0 — VERIFICACIÓN DE PROCEDENCIA
+   ========================================================================= */
+function renderGate(){
+  const bloqueos = [];
+
+  if(state.escenario === 'duplicada'){
+    bloqueos.push({
+      titulo:'Ya tienes una solicitud de supletorio en curso',
+      texto:`Existe una solicitud de Examen Supletorio con radicado <b>${RADICADO_EN_CURSO}</b> que aún está en trámite. Debes esperar la respuesta antes de radicar una nueva. <a href="estudiante.html#respuestas" style="color:#8A2C22;font-weight:700;">Ver la solicitud existente</a>.`
+    });
+  }
+
+  let html = '';
+  bloqueos.forEach(b => {
+    html += `<div class="alert alert-danger">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8A2C22" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5h.01" stroke-linecap="round"/></svg>
+      <div><b>${b.titulo}</b>${b.texto}</div></div>`;
+  });
+  $('gateAlerts').innerHTML = html;
+
+  $('gateOk').hidden = bloqueos.length > 0;
+  $('btnGate').disabled = bloqueos.length > 0;
+}
+
+/* =========================================================================
+   VALIDACIÓN POR PASO
+   ========================================================================= */
+/* Prototipo de demostración: la validación de campos obligatorios queda
+   desactivada para poder recorrer el formulario libremente ante el cliente,
+   sin modificar el diseño (asteriscos y mensajes se mantienen tal cual).
+   Cambiar a true para reactivarla. */
+const VALIDACION_ACTIVA = false;
+
+function erroresPaso(n){
+  const e = [];
+  if(!VALIDACION_ACTIVA) return e;
+
+  if(n === 1 && debeValidar()){
+    const t = state.telefono.replace(/\D/g,'');
+    if(!state.telefono.trim()) e.push({campo:'telefono', msg:'Este campo es requerido.'});
+    else if(t.length < 7) e.push({campo:'telefono', msg:'Ingresa un número de contacto válido (mínimo 7 dígitos).'});
+  }
+
+  if(n === 2 && debeValidar()){
+    if(!state.asigNombre.trim()) e.push({campo:'asigNombre', msg:'Este campo es requerido.'});
+    if(!state.asigCodigo.trim()) e.push({campo:'asigCodigo', msg:'Este campo es requerido.'});
+
+    if(!state.fechaNoPresentado) e.push({campo:'fechaNoPresentado', msg:'Este campo es requerido.'});
+    else if(aFecha(state.fechaNoPresentado) > hoy()) e.push({campo:'fechaNoPresentado', msg:'La fecha del examen no puede ser posterior a hoy.'});
+    else if(plazoDe(state.fechaNoPresentado).tipo === 'vencido') e.push({campo:'fechaNoPresentado', msg:`El plazo de ${PLAZO_DIAS_HABILES} días hábiles para solicitar el supletorio de este examen ya venció.`});
+
+    if(!state.fechaPropuesta) e.push({campo:'fechaPropuesta', msg:'Este campo es requerido.'});
+    else if(aFecha(state.fechaPropuesta) < hoy()) e.push({campo:'fechaPropuesta', msg:'La fecha propuesta no puede ser anterior a hoy.'});
+
+    if(!state.firmaDocente) e.push({campo:'firmaDocente', msg:'Debes adjuntar el formato firmado por el docente que orienta la asignatura.'});
+
+    if(!state.tipoCausa){
+      e.push({campo:'tipoCausa', msg:'Debes indicar la causa por la que no presentaste el examen.'});
+    }else if(state.tipoCausa === 'cruce'){
+      if(!state.cruceNombre.trim()) e.push({campo:'cruceNombre', msg:'Debes indicar la asignatura con la que se presenta el cruce.'});
+      if(!state.cruceCodigo.trim()) e.push({campo:'cruceCodigo', msg:'Este campo es requerido.'});
+      else if(state.asigCodigo.trim() && state.cruceCodigo.trim().toLowerCase() === state.asigCodigo.trim().toLowerCase()) e.push({campo:'cruceCodigo', msg:'La asignatura del cruce debe ser distinta a la del examen no presentado.'});
+      if(!state.cruceFecha) e.push({campo:'cruceFecha', msg:'Este campo es requerido.'});
+      else if(state.fechaNoPresentado && state.cruceFecha !== state.fechaNoPresentado) e.push({campo:'cruceFecha', msg:`Para que exista cruce, el examen debe ser el mismo día del no presentado${state.fechaNoPresentado ? ' (' + fmtFecha(state.fechaNoPresentado) + ')' : ''}.`});
+      if(!state.cruceHora) e.push({campo:'cruceHora', msg:'Este campo es requerido.'});
+      if(!state.firmaDocenteCruce) e.push({campo:'firmaDocenteCruce', msg:'Debes adjuntar el formato firmado por el docente de la asignatura con la que se presenta el cruce.'});
+    }else{
+      const len = state.descripcion.trim().length;
+      if(len === 0) e.push({campo:'descripcion', msg:'Este campo es requerido.'});
+      else if(len < MIN_DESC) e.push({campo:'descripcion', msg:`La descripción debe tener al menos ${MIN_DESC} caracteres. Actualmente tiene ${len}.`});
+    }
+  }
+
+  if(n === 3){
+    if(!state.declara) e.push({campo:'declara', msg:'Debe aceptar la declaración de veracidad para radicar la solicitud.'});
+  }
+  return e;
+}
+const pasoValido = n => erroresPaso(n).length === 0;
+
+/* =========================================================================
+   STEPPER
+   ========================================================================= */
+function renderStepper(){
+  document.querySelectorAll('.step').forEach(b => {
+    const n = Number(b.dataset.step);
+    b.classList.toggle('is-current', n === state.paso);
+    b.classList.toggle('is-done', n < state.paso && pasoValido(n));
+    b.classList.toggle('is-error', n !== state.paso && state.touched[n] && !pasoValido(n));
+    const accesible = n <= state.maxPasoVisto;
+    b.classList.toggle('clickable', accesible);
+    b.disabled = !accesible;
+    if(n === state.paso) b.setAttribute('aria-current','step'); else b.removeAttribute('aria-current');
+  });
+}
+
+/* =========================================================================
+   FRAGMENTOS REUTILIZABLES
+   ========================================================================= */
+let uid = 0;
+function campoRO(label, valor){
+  const id = 'ro' + (++uid);
+  return `<div class="fld readonly"><label for="${id}">${label}</label><input type="text" id="${id}" value="${esc(valor)}" readonly tabindex="-1"></div>`;
+}
+function uploadZoneHTML(key, formatos){
+  return `<button type="button" class="upload-zone" data-upload="${key}">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9AA2B1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+    <span><b>Seleccionar archivo</b><br>${formatos} · máx. ${MAX_MB} MB</span>
+  </button>`;
+}
+function fileOkHTML(file, key){
+  return `<div class="file-ok">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1F6B4A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5.5 5.5L20 7"/></svg>
+    <span class="fname">${esc(file.name)}</span>
+    <span style="color:#3E8A68;">${fmtTam(file.size)}</span>
+    <button type="button" class="link-btn" data-replace="${key}" style="color:#1F6B4A;">Reemplazar</button>
+  </div>`;
+}
+function chipPlazo(p){
+  if(p.tipo === 'ok')      return `<div class="vig vig-ok"><span class="vig-dot"></span>Dentro del plazo · vence el ${p.vencTxt}</div>`;
+  if(p.tipo === 'ultimo')  return `<div class="vig vig-warn"><span class="vig-dot"></span>Último día · el plazo vence hoy, ${p.vencTxt}</div>`;
+  return `<div class="vig vig-bad"><span class="vig-dot"></span>Plazo vencido · venció el ${p.vencTxt}</div>`;
+}
+
+/* =========================================================================
+   PASO 1 — INFORMACIÓN DEL SOLICITANTE
+   ========================================================================= */
+function renderPaso1(){
+  const errs = state.touched[1] ? erroresPaso(1) : [];
+  const errTel = errs.find(x => x.campo === 'telefono');
+  return `
+    <h2 class="paso-title">Información del solicitante</h2>
+    <p class="paso-intro">Estos datos se toman automáticamente de tu sesión y del registro académico. Verifícalos antes de continuar.</p>
+    <div class="grid-2">
+      ${campoRO('Fecha de la solicitud', fmtFechaLarga(isoHoy()))}
+      ${campoRO('Nombre', SESION.nombre)}
+      ${campoRO('Programa', SESION.programa)}
+      ${campoRO('Código', SESION.codigo)}
+      ${campoRO('Semestre', SESION.periodoCarrera + '°')}
+      ${campoRO(SESION.tipoDocumento, SESION.documento)}
+      ${campoRO('Correo institucional', SESION.correo)}
+      <div class="fld ${errTel ? 'has-error' : ''}">
+        <label for="fTel">Teléfono de contacto <span class="req">*</span></label>
+        <input type="tel" id="fTel" value="${esc(state.telefono)}" placeholder=" Ej: 318 442 7790" inputmode="tel">
+        <div class="err">${errTel ? esc(errTel.msg) : ''}</div>
+      </div>
+    </div>
+    <p class="foot-note">Si el nombre, el código, el programa o el correo son incorrectos, debes corregirlos ante DARCA antes de radicar la solicitud. La información aquí mostrada es la que quedará registrada en el trámite.</p>`;
+}
+
+/* =========================================================================
+   PLANTILLAS DESCARGABLES (formato de firma del docente)
+   ========================================================================= */
+function construirDocumentoHTML(titulo, intro, filas){
+  const filasHTML = filas.map(([et,v]) => `
+    <div style="margin-bottom:11px;">
+      <div style="font-family:Calibri,Arial,sans-serif;font-size:9.5px;text-transform:uppercase;letter-spacing:.4px;color:#555;margin-bottom:2px;">${esc(et)}</div>
+      <div style="font-family:Calibri,Arial,sans-serif;font-size:12px;border-bottom:1px solid #000;padding-bottom:3px;min-height:14px;">${esc(v || '')}</div>
+    </div>`).join('');
+  const hoyLargo = fmtFechaLarga(isoHoy());
+  return `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+    <head><meta charset="utf-8"><title>${esc(titulo)}</title></head>
+    <body style="font-family:Calibri,Arial,sans-serif;font-size:13px;color:#000;line-height:1.55;padding:10px 6px;">
+      <div style="font-size:15px;font-weight:bold;color:#000;letter-spacing:.3px;">UNIVERSIDAD DEL CAUCA</div>
+      <div style="font-size:11.5px;color:#444;">Facultad de Ingeniería Electrónica y Telecomunicaciones</div>
+      <div style="border-top:2px solid #000;margin:8px 0 16px;"></div>
+
+      <h2 style="color:#000;text-align:center;text-transform:uppercase;letter-spacing:.4px;font-size:15px;margin:0 0 4px;">${esc(titulo)}</h2>
+      <p style="text-align:center;color:#555;font-size:11px;margin:0 0 20px;">Anexo del trámite de Examen Supletorio &nbsp;·&nbsp; Generado el ${hoyLargo}</p>
+
+      <p style="margin:0 0 18px;">${intro}</p>
+
+      <div style="width:100%;max-width:420px;margin-bottom:20px;">${filasHTML}</div>
+
+      <p style="margin:0 0 30px;font-size:12px;color:#333;">
+        El docente cuya firma se registra a continuación certifica haber recibido y verificado la información consignada en este formato.
+      </p>
+
+      <div style="margin-bottom:34px;">
+        <div style="font-family:Calibri,Arial,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:#555;margin-bottom:32px;">Nombre del docente</div>
+        <div style="font-family:Calibri,Arial,sans-serif;font-size:13px;letter-spacing:1px;">_______________________________________</div>
+      </div>
+      <div>
+        <div style="font-family:Calibri,Arial,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:#555;margin-bottom:42px;">Firma del docente</div>
+        <div style="font-family:Calibri,Arial,sans-serif;font-size:13px;letter-spacing:1px;">_______________________________________</div>
+      </div>
+
+      <div style="border-top:1px solid #999;margin-top:40px;padding-top:8px;font-family:Calibri,Arial,sans-serif;font-size:10px;color:#777;">
+        Documento generado por el Sistema de Gestión de Procesos Académicos FIET, Universidad del Cauca. Este formato hace parte de los anexos de la solicitud de Examen Supletorio y no requiere radicación independiente.
+      </div>
+    </body>
+  </html>`;
+}
+function descargarArchivoDoc(html, nombre){
+  const blob = new Blob(['﻿', html], {type:'application/msword'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = nombre;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function descargarPlantillaPrincipal(){
+  const intro = `El(la) estudiante <b>${esc(SESION.nombre)}</b>, código <b>${esc(SESION.codigo)}</b>, del programa de <b>${esc(SESION.programa)}</b>, solicita autorización de examen supletorio para la asignatura y fechas que se relacionan a continuación.`;
+  const html = construirDocumentoHTML('Formato de novedad — Examen supletorio', intro, [
+    ['Asignatura', state.asigNombre],
+    ['Código de la asignatura', state.asigCodigo],
+    ['Fecha del examen no presentado', state.fechaNoPresentado ? fmtFecha(state.fechaNoPresentado) : ''],
+    ['Fecha acordada para el examen supletorio', state.fechaPropuesta ? fmtFecha(state.fechaPropuesta) : '']
+  ]);
+  descargarArchivoDoc(html, 'formato-firma-docente.doc');
+}
+function descargarPlantillaCruce(){
+  const intro = `El(la) estudiante <b>${esc(SESION.nombre)}</b>, código <b>${esc(SESION.codigo)}</b>, del programa de <b>${esc(SESION.programa)}</b>, presentó un cruce de horario con el examen de la asignatura que se relaciona a continuación, motivo por el cual no concurrió al examen objeto de esta solicitud.`;
+  const html = construirDocumentoHTML('Formato de novedad — Cruce de exámenes', intro, [
+    ['Asignatura con la que se presenta el cruce', state.cruceNombre],
+    ['Código de la asignatura', state.cruceCodigo],
+    ['Fecha del examen', state.cruceFecha ? fmtFecha(state.cruceFecha) : ''],
+    ['Hora del examen', state.cruceHora ? fmtHora(state.cruceHora) : '']
+  ]);
+  descargarArchivoDoc(html, 'formato-firma-docente-cruce.doc');
+}
+
+/* =========================================================================
+   PASO 2 — EXAMEN Y PROGRAMACIÓN
+   ========================================================================= */
+function renderPaso2(){
+  const errs = state.touched[2] ? erroresPaso(2) : [];
+  const err = c => errs.find(x => x.campo === c);
+  const plazo = state.fechaNoPresentado ? plazoDe(state.fechaNoPresentado) : null;
+
+  const opciones = `
+    <div class="pick ${err('tipoCausa') ? 'has-error' : ''}" role="radiogroup" aria-label="Causa de la inasistencia">
+      <label class="pick-item ${state.tipoCausa === 'otra' ? 'is-selected' : ''}">
+        <input type="radio" name="tipoCausa" value="otra" ${state.tipoCausa === 'otra' ? 'checked' : ''}>
+        <div class="pick-body">
+          <div class="pick-title">Causa distinta a un cruce de asignaturas</div>
+          <div class="pick-desc">Incapacidad médica, calamidad doméstica, comisión institucional u otra causa. Debes describirla; el soporte documental es opcional.</div>
+        </div>
+      </label>
+      <label class="pick-item ${state.tipoCausa === 'cruce' ? 'is-selected' : ''}">
+        <input type="radio" name="tipoCausa" value="cruce" ${state.tipoCausa === 'cruce' ? 'checked' : ''}>
+        <div class="pick-body">
+          <div class="pick-title">Cruce con el examen de otra asignatura</div>
+          <div class="pick-desc">Tenías programado otro examen a la misma hora y presentaste ese. Debes identificar esa asignatura y el examen que sí presentaste.</div>
+        </div>
+      </label>
+    </div>
+    <div class="err" style="${err('tipoCausa') ? 'display:block;margin-top:8px;' : ''}">${err('tipoCausa') ? esc(err('tipoCausa').msg) : ''}</div>`;
+
+  let rama = '';
+
+  if(state.tipoCausa === 'cruce'){
+    rama = `
+      <div class="subhead" id="secCruce">Asignatura con la que se presentó el cruce</div>
+      <div class="grid-3">
+        <div class="fld wide ${err('cruceNombre') ? 'has-error' : ''}">
+          <label for="fCruceNombre">Nombre de la asignatura <span class="req">*</span></label>
+          <input type="text" id="fCruceNombre" value="${esc(state.cruceNombre)}" placeholder="Ej. Redes de Computadores">
+          <div class="err">${err('cruceNombre') ? esc(err('cruceNombre').msg) : ''}</div>
+        </div>
+        <div class="fld">
+          <label for="fCruceGrupo">Grupo</label>
+          <input type="text" id="fCruceGrupo" value="${esc(state.cruceGrupo)}" placeholder="Ej. A">
+        </div>
+        <div class="fld ${err('cruceCodigo') ? 'has-error' : ''}">
+          <label for="fCruceCodigo">Código de la asignatura <span class="req">*</span></label>
+          <input type="text" id="fCruceCodigo" value="${esc(state.cruceCodigo)}" placeholder="Ej. TEL-3311">
+          <div class="err">${err('cruceCodigo') ? esc(err('cruceCodigo').msg) : ''}</div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="fld ${err('cruceFecha') ? 'has-error' : ''}">
+          <label for="fCruceFecha">Fecha del examen <span class="req">*</span></label>
+          <input type="date" id="fCruceFecha" value="${state.cruceFecha}" max="${isoHoy()}">
+          <div class="hint">Debe corresponder al mismo día del examen no presentado.</div>
+          <div class="err">${err('cruceFecha') ? esc(err('cruceFecha').msg) : ''}</div>
+        </div>
+        <div class="fld ${err('cruceHora') ? 'has-error' : ''}">
+          <label for="fCruceHora">Hora del examen <span class="req">*</span></label>
+          <input type="time" id="fCruceHora" value="${state.cruceHora}">
+          <div class="err">${err('cruceHora') ? esc(err('cruceHora').msg) : ''}</div>
+        </div>
+      </div>
+
+      <div class="subhead" id="secFirmaCruce">Firma del docente de la asignatura con la que se presenta el cruce</div>
+      <p class="paso-intro" style="margin-bottom:12px;">Descarga el formato, hazlo firmar por ese docente y adjúntalo a continuación.</p>
+      <button type="button" class="link-btn" id="btnDescargarFirmaCruce" style="margin-bottom:10px;display:inline-flex;align-items:center;gap:7px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+        Descargar formato para firma del docente
+      </button>
+      <div class="fld adj ${err('firmaDocenteCruce') ? 'has-error' : ''}" id="firmaCruceBox">
+        <div id="firmaCruceSlot">${state.firmaDocenteCruce ? fileOkHTML(state.firmaDocenteCruce,'firmaCruce') : uploadZoneHTML('firmaCruce','PDF, JPG o PNG')}</div>
+        <input type="file" id="fFirmaCruce" accept=".pdf,.jpg,.jpeg,.png" hidden>
+        <div class="err" style="${err('firmaDocenteCruce') ? 'display:block;margin-top:8px;' : ''}">${err('firmaDocenteCruce') ? esc(err('firmaDocenteCruce').msg) : ''}</div>
+        <div class="err" id="firmaCruceErr" style="display:none;margin-top:8px;"></div>
+      </div>`;
+  }
+
+  if(state.tipoCausa === 'otra'){
+    const len = state.descripcion.length;
+    rama = `
+      <div class="subhead" id="secJust">Justificación</div>
+      <div class="fld ${err('descripcion') ? 'has-error' : ''}" style="margin-bottom:18px;">
+        <label for="fDesc">Justificación de por qué no presentó el examen <span class="req">*</span></label>
+        <textarea id="fDesc" maxlength="${MAX_DESC}" placeholder="Describa con claridad por qué no pudo presentarse al examen en la fecha y hora programadas...">${esc(state.descripcion)}</textarea>
+        <div class="counter ${len > 0 && len < MIN_DESC ? 'bad' : ''}" id="cCount">${len} / ${MAX_DESC.toLocaleString('es-CO')} caracteres (mínimo ${MIN_DESC})</div>
+        <div class="err">${err('descripcion') ? esc(err('descripcion').msg) : ''}</div>
+      </div>
+      <div class="fld adj" id="anexoBox">
+        <label>Documento de justificación <span style="color:var(--muted);font-weight:600;">(opcional)</span></label>
+        <div class="hint" style="margin-bottom:8px;">Incapacidad, constancia médica, certificación laboral, acta de comisión u otro documento que respalde lo descrito. Formatos PDF, JPG o PNG. Máximo ${MAX_MB} MB.</div>
+        <div id="anexoSlot">${state.anexo ? fileOkHTML(state.anexo,'anexo') : uploadZoneHTML('anexo','PDF, JPG o PNG')}</div>
+        <input type="file" id="fAnexo" accept=".pdf,.jpg,.jpeg,.png" hidden>
+        <div class="err" id="anexoErr" style="display:none;margin-top:8px;"></div>
+      </div>`;
+  }
+
+  return `
+    <h2 class="paso-title">Examen y programación</h2>
+    <p class="paso-intro">Registra la asignatura y la fecha del examen al que no concurriste. El supletorio debe solicitarse dentro de los ${PLAZO_DIAS_HABILES} días hábiles siguientes a esa fecha.</p>
+
+    <div class="subhead" id="secAsig" style="margin-top:0;">Asignatura del examen no presentado</div>
+    <div class="grid-3">
+      <div class="fld wide ${err('asigNombre') ? 'has-error' : ''}">
+        <label for="fAsigNombre">Nombre de la asignatura <span class="req">*</span></label>
+        <input type="text" id="fAsigNombre" value="${esc(state.asigNombre)}" placeholder="Ej. Redes de Computadores">
+        <div class="err">${err('asigNombre') ? esc(err('asigNombre').msg) : ''}</div>
+      </div>
+      <div class="fld">
+        <label for="fAsigGrupo">Grupo</label>
+        <input type="text" id="fAsigGrupo" value="${esc(state.asigGrupo)}" placeholder="Ej. A">
+      </div>
+      <div class="fld ${err('asigCodigo') ? 'has-error' : ''}">
+        <label for="fAsigCodigo">Código de la asignatura <span class="req">*</span></label>
+        <input type="text" id="fAsigCodigo" value="${esc(state.asigCodigo)}" placeholder="Ej. TEL-3311">
+        <div class="err">${err('asigCodigo') ? esc(err('asigCodigo').msg) : ''}</div>
+      </div>
+    </div>
+
+    <div class="subhead" id="secFechas">Fechas del examen</div>
+    <div class="grid-2">
+      <div class="fld ${err('fechaNoPresentado') ? 'has-error' : ''}">
+        <label for="fFechaNo">Fecha del examen no concurrido <span class="req">*</span></label>
+        <input type="date" id="fFechaNo" value="${state.fechaNoPresentado}" max="${isoHoy()}">
+        ${plazo ? chipPlazo(plazo) : ''}
+        <div class="err">${err('fechaNoPresentado') ? esc(err('fechaNoPresentado').msg) : ''}</div>
+      </div>
+      <div class="fld ${err('fechaPropuesta') ? 'has-error' : ''}">
+        <label for="fFechaProp">Fecha acordada para el examen supletorio <span class="req">*</span></label>
+        <input type="date" id="fFechaProp" value="${state.fechaPropuesta}" min="${isoHoy()}">
+        <div class="err">${err('fechaPropuesta') ? esc(err('fechaPropuesta').msg) : ''}</div>
+      </div>
+    </div>
+
+    <div class="subhead" id="secFirma">Firma del docente que orienta la asignatura</div>
+    <p class="paso-intro" style="margin-bottom:12px;">Descarga el formato, hazlo firmar por el docente que orienta la asignatura y adjúntalo a continuación.</p>
+    <button type="button" class="link-btn" id="btnDescargarFirma" style="margin-bottom:10px;display:inline-flex;align-items:center;gap:7px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+      Descargar formato para firma del docente
+    </button>
+    <div class="fld adj ${err('firmaDocente') ? 'has-error' : ''}" id="firmaBox">
+      <div id="firmaSlot">${state.firmaDocente ? fileOkHTML(state.firmaDocente,'firma') : uploadZoneHTML('firma','PDF, JPG o PNG')}</div>
+      <input type="file" id="fFirma" accept=".pdf,.jpg,.jpeg,.png" hidden>
+      <div class="err" style="${err('firmaDocente') ? 'display:block;margin-top:8px;' : ''}">${err('firmaDocente') ? esc(err('firmaDocente').msg) : ''}</div>
+      <div class="err" id="firmaErr" style="display:none;margin-top:8px;"></div>
+    </div>
+
+    <div class="subhead" id="secCausa">Causa de la inasistencia</div>
+    ${opciones}
+    ${rama}`;
+}
+
+/* =========================================================================
+   PASO 3 — REVISIÓN Y ENVÍO
+   ========================================================================= */
+function renderPaso3(){
+  const errs = state.touched[3] ? erroresPaso(3) : [];
+  const errDecl = errs.find(x => x.campo === 'declara');
+
+  const causaHTML = state.tipoCausa === 'cruce'
+    ? `<dl class="dl">
+        <dt>Causa</dt><dd>Cruce con el examen de otra asignatura</dd>
+        <dt>Asignatura del cruce</dt><dd>${esc(state.cruceNombre) || '—'}${state.cruceCodigo ? ' (' + esc(state.cruceCodigo) + ')' : ''}${state.cruceGrupo ? ' — Grupo ' + esc(state.cruceGrupo) : ''}</dd>
+        <dt>Examen que sí presentó</dt><dd>${state.cruceFecha ? fmtFecha(state.cruceFecha) : '—'} ${state.cruceHora ? 'a las ' + fmtHora(state.cruceHora) : ''}</dd>
+        <dt>Firma del docente del cruce</dt><dd>${state.firmaDocenteCruce ? esc(state.firmaDocenteCruce.name) : '—'}</dd>
+      </dl>`
+    : state.tipoCausa === 'otra'
+      ? `<div class="just">${esc(state.descripcion) || 'Sin descripción.'}</div>
+         <ul class="lista-docs" style="margin-top:12px;">
+           <li>
+             ${state.anexo
+               ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2E9E6B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5.5 5.5L20 7"/></svg>`
+               : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8A8F9E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg>`}
+             <span style="flex:1;">Documento de justificación (opcional)</span>
+             <span style="color:var(--muted);">${state.anexo ? esc(state.anexo.name) : 'No adjuntado'}</span>
+           </li>
+         </ul>`
+      : `<p style="margin:0;font-size:12.8px;color:var(--muted);">Aún no has indicado la causa de la inasistencia.</p>`;
+
+  return `
+    <h2 class="paso-title">Revisión y envío</h2>
+    <p class="paso-intro">Revisa la información antes de radicar. Una vez enviada, la solicitud no podrá modificarse.</p>
+
+    <div class="rev">
+      <div class="rev-head"><h3>Solicitante</h3><button type="button" class="link-btn" data-goto="1">Editar</button></div>
+      <div class="rev-body">
+        <dl class="dl">
+          <dt>Fecha de la solicitud</dt><dd>${fmtFechaLarga(isoHoy())}</dd>
+          <dt>Nombre completo</dt><dd>${esc(SESION.nombre)}</dd>
+          <dt>Código estudiantil</dt><dd>${SESION.codigo}</dd>
+          <dt>Programa</dt><dd>${esc(SESION.programa)}</dd>
+          <dt>Periodo de carrera</dt><dd>${SESION.periodoCarrera}°</dd>
+          <dt>Correo institucional</dt><dd>${SESION.correo}</dd>
+          <dt>Teléfono de contacto</dt><dd>${esc(state.telefono) || '—'}</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="rev">
+      <div class="rev-head"><h3>Examen y programación</h3><button type="button" class="link-btn" data-goto="2">Editar</button></div>
+      <div class="rev-body">
+        <dl class="dl">
+          <dt>Asignatura</dt><dd>${esc(state.asigNombre) || '—'}${state.asigCodigo ? ' (' + esc(state.asigCodigo) + ')' : ''}${state.asigGrupo ? ' — Grupo ' + esc(state.asigGrupo) : ''}</dd>
+          <dt>Fecha del examen no presentado</dt><dd>${state.fechaNoPresentado ? fmtFecha(state.fechaNoPresentado) : '—'}</dd>
+          <dt>Fecha acordada para el supletorio</dt><dd>${state.fechaPropuesta ? fmtFecha(state.fechaPropuesta) : '—'}</dd>
+          <dt>Firma del docente</dt><dd>${state.firmaDocente ? esc(state.firmaDocente.name) : '—'}</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="rev">
+      <div class="rev-head"><h3>Causa y sustento</h3><button type="button" class="link-btn" data-goto="2">Editar</button></div>
+      <div class="rev-body">${causaHTML}</div>
+    </div>
+
+    <div class="check ${errDecl ? 'has-error' : ''}" id="declBox">
+      <input type="checkbox" id="fDecl" ${state.declara ? 'checked' : ''}>
+      <label for="fDecl">Declaro que la información consignada y los documentos adjuntos son veraces, y que acordé con el docente la fecha propuesta. Entiendo que la inexactitud puede dar lugar al rechazo de la solicitud.</label>
+    </div>
+    ${errDecl ? `<div class="err" style="display:block;margin-top:8px;">${esc(errDecl.msg)}</div>` : ''}
+
+    <div class="alert alert-info" style="margin-top:18px;margin-bottom:0;">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#25407E" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01" stroke-linecap="round"/></svg>
+      <div>
+        <b>Antes de enviar, ten en cuenta</b>
+        El examen supletorio requiere el pago de los derechos correspondientes. Si el Decano aprueba tu solicitud, recibirás el recibo de pago en el módulo de Respuestas y deberás subir el comprobante desde la aplicación; el examen no queda autorizado hasta que ese comprobante sea verificado.<br><br>
+        De conformidad con los Artículos 53 y 54 del Código Contencioso Administrativo, la respuesta será notificada a tu correo institucional. Contra la decisión del Decano solo procede el recurso de reposición, dentro de los tres días siguientes.
+      </div>
+    </div>`;
+}
+
+/* =========================================================================
+   RENDER GENERAL
+   ========================================================================= */
+const PASOS = {1:renderPaso1, 2:renderPaso2, 3:renderPaso3};
+const ULTIMO_PASO = 3;
+
+function render(){
+  $('pasoBody').innerHTML = PASOS[state.paso]();
+  renderStepper();
+  $('btnAtrasTxt').textContent = state.paso === 1 ? 'Volver al catálogo' : 'Atrás';
+  $('btnAdelanteTxt').textContent = state.paso === ULTIMO_PASO ? 'Enviar solicitud' : 'Continuar';
+  $('btnAdelanteIcon').innerHTML = state.paso === ULTIMO_PASO
+    ? '<path d="M4 12.5l5.5 5.5L20 7"/>'
+    : '<path d="M5 12h14M13 6l6 6-6 6"/>';
+  enlazarPaso();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* =========================================================================
+   EVENTOS POR PASO
+   ========================================================================= */
+function enlazarPaso(){
+  const body = $('pasoBody');
+
+  // Paso 1
+  const tel = $('fTel');
+  if(tel) tel.addEventListener('input', e => { state.telefono = e.target.value; });
+
+  // Paso 2 — asignatura y fechas del examen no presentado
+  const an = $('fAsigNombre');
+  if(an) an.addEventListener('input', e => { state.asigNombre = e.target.value; });
+  const ag = $('fAsigGrupo');
+  if(ag) ag.addEventListener('input', e => { state.asigGrupo = e.target.value; });
+  const acod = $('fAsigCodigo');
+  if(acod) acod.addEventListener('input', e => { state.asigCodigo = e.target.value; });
+  const fn = $('fFechaNo');
+  if(fn) fn.addEventListener('change', e => { state.fechaNoPresentado = e.target.value; render(); });
+  const fp = $('fFechaProp');
+  if(fp) fp.addEventListener('change', e => { state.fechaPropuesta = e.target.value; });
+
+  // Firma del docente (examen no presentado)
+  const fFirma = $('fFirma');
+  if(fFirma) fFirma.addEventListener('change', e => {
+    const f = e.target.files[0];
+    if(!f) return;
+    const errBox = $('firmaErr');
+    const val = validarArchivo(f, ['pdf','jpg','jpeg','png']);
+    if(val){ errBox.textContent = val; errBox.style.display = 'block'; e.target.value = ''; return; }
+    errBox.style.display = 'none';
+    state.firmaDocente = {name:f.name, size:f.size};
+    render();
+  });
+  const btnDescFirma = $('btnDescargarFirma');
+  if(btnDescFirma) btnDescFirma.addEventListener('click', descargarPlantillaPrincipal);
+  body.querySelectorAll('[data-upload="firma"]').forEach(z => z.addEventListener('click', () => $('fFirma').click()));
+  body.querySelectorAll('[data-replace="firma"]').forEach(b => b.addEventListener('click', () => $('fFirma').click()));
+
+  // Causa de la inasistencia
+  body.querySelectorAll('input[name="tipoCausa"]').forEach(r => {
+    r.addEventListener('change', e => { state.tipoCausa = e.target.value; render(); });
+  });
+
+  // Rama: cruce con otra asignatura
+  const cn = $('fCruceNombre');
+  if(cn) cn.addEventListener('input', e => { state.cruceNombre = e.target.value; });
+  const cg = $('fCruceGrupo');
+  if(cg) cg.addEventListener('input', e => { state.cruceGrupo = e.target.value; });
+  const ccod = $('fCruceCodigo');
+  if(ccod) ccod.addEventListener('input', e => { state.cruceCodigo = e.target.value; });
+  const cf = $('fCruceFecha');
+  if(cf) cf.addEventListener('change', e => { state.cruceFecha = e.target.value; });
+  const ch = $('fCruceHora');
+  if(ch) ch.addEventListener('change', e => { state.cruceHora = e.target.value; });
+  const fFirmaCruce = $('fFirmaCruce');
+  if(fFirmaCruce) fFirmaCruce.addEventListener('change', e => {
+    const f = e.target.files[0];
+    if(!f) return;
+    const errBox = $('firmaCruceErr');
+    const val = validarArchivo(f, ['pdf','jpg','jpeg','png']);
+    if(val){ errBox.textContent = val; errBox.style.display = 'block'; e.target.value = ''; return; }
+    errBox.style.display = 'none';
+    state.firmaDocenteCruce = {name:f.name, size:f.size};
+    render();
+  });
+  const btnDescFirmaCruce = $('btnDescargarFirmaCruce');
+  if(btnDescFirmaCruce) btnDescFirmaCruce.addEventListener('click', descargarPlantillaCruce);
+  body.querySelectorAll('[data-upload="firmaCruce"]').forEach(z => z.addEventListener('click', () => $('fFirmaCruce').click()));
+  body.querySelectorAll('[data-replace="firmaCruce"]').forEach(b => b.addEventListener('click', () => $('fFirmaCruce').click()));
+
+  // Rama: otra causa
+  const desc = $('fDesc');
+  if(desc) desc.addEventListener('input', e => {
+    state.descripcion = e.target.value;
+    const n = state.descripcion.length;
+    const c = $('cCount');
+    c.textContent = `${n} / ${MAX_DESC.toLocaleString('es-CO')} caracteres (mínimo ${MIN_DESC})`;
+    c.classList.toggle('bad', n > 0 && n < MIN_DESC);
+  });
+  const fAnexo = $('fAnexo');
+  if(fAnexo) fAnexo.addEventListener('change', e => {
+    const f = e.target.files[0];
+    if(!f) return;
+    const errBox = $('anexoErr');
+    const val = validarArchivo(f, ['pdf','jpg','jpeg','png']);
+    if(val){ errBox.textContent = val; errBox.style.display = 'block'; e.target.value = ''; return; }
+    errBox.style.display = 'none';
+    state.anexo = {name:f.name, size:f.size};
+    render();
+  });
+  body.querySelectorAll('[data-upload="anexo"]').forEach(z => z.addEventListener('click', () => $('fAnexo').click()));
+  body.querySelectorAll('[data-replace="anexo"]').forEach(b => b.addEventListener('click', () => $('fAnexo').click()));
+
+  // Paso 3
+  const decl = $('fDecl');
+  if(decl) decl.addEventListener('change', e => {
+    state.declara = e.target.checked;
+    if(state.touched[3]) render();
+  });
+  body.querySelectorAll('[data-goto]').forEach(b => b.addEventListener('click', () => irAPaso(Number(b.dataset.goto))));
+}
+
+function validarArchivo(f, formatos){
+  const ext = extDe(f.name);
+  const lista = formatos.map(x => x.toUpperCase()).filter((x,i,a) => a.indexOf(x) === i).join(', ');
+  if(!formatos.includes(ext)) return `Formato no admitido. El formato esperado para este anexo es ${lista}.`;
+  if(f.size > MAX_MB * 1048576) return `El archivo pesa ${fmtTam(f.size)} y supera el máximo permitido de ${MAX_MB} MB.`;
+  return null;
+}
+
+/* =========================================================================
+   NAVEGACIÓN
+   ========================================================================= */
+function irAPaso(n){
+  state.paso = n;
+  state.maxPasoVisto = Math.max(state.maxPasoVisto, n);
+  render();
+}
+
+function scrollAlPrimerError(n){
+  const err = erroresPaso(n)[0];
+  if(!err) return;
+  const MAPA = {
+    telefono:'fTel', asigNombre:'fAsigNombre', asigCodigo:'fAsigCodigo', fechaNoPresentado:'fFechaNo',
+    fechaPropuesta:'fFechaProp', firmaDocente:'firmaBox', tipoCausa:'secCausa',
+    cruceNombre:'fCruceNombre', cruceCodigo:'fCruceCodigo', cruceFecha:'fCruceFecha', cruceHora:'fCruceHora',
+    firmaDocenteCruce:'firmaCruceBox', descripcion:'fDesc', declara:'declBox'
+  };
+  const el = $(MAPA[err.campo]);
+  if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function adelante(){
+  if(state.paso === ULTIMO_PASO){ enviar(); return; }
+  if(!pasoValido(state.paso)){
+    state.touched[state.paso] = true;
+    render();
+    scrollAlPrimerError(state.paso);
+    mostrarToast('<b>Faltan datos por diligenciar.</b><br>Revisa los campos resaltados en rojo antes de continuar.', true);
+    return;
+  }
+  state.touched[state.paso] = false;
+  irAPaso(state.paso + 1);
+}
+
+function atras(){
+  if(state.paso === 1){ salirDelFormulario(); return; }
+  irAPaso(state.paso - 1);
+}
+
+function hayDatos(){
+  return !!(state.telefono.trim() || state.asigNombre.trim() || state.asigCodigo.trim() ||
+            state.fechaNoPresentado || state.fechaPropuesta || state.firmaDocente || state.tipoCausa ||
+            state.descripcion.trim() || state.anexo || state.cruceNombre.trim() || state.firmaDocenteCruce);
+}
+
+function salirDelFormulario(){
+  if(!hayDatos()){ window.location.href = 'estudiante.html'; return; }
+  abrirModal({
+    titulo:'¿Salir sin radicar la solicitud?',
+    texto:'La información que has diligenciado no se guarda. Si sales ahora, tendrás que empezar de nuevo.',
+    confirmar:'Salir sin guardar',
+    peligro:true,
+    onConfirmar:() => { window.location.href = 'estudiante.html'; }
+  });
+}
+
+/* =========================================================================
+   MODAL
+   ========================================================================= */
+function abrirModal({titulo, texto, confirmar, peligro, onConfirmar}){
+  $('modalSlot').innerHTML = `
+    <div class="modal-bg" id="modalBg" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+      <div class="modal">
+        <div class="modal-body">
+          <h3 id="modalTitulo">${esc(titulo)}</h3>
+          <p>${esc(texto)}</p>
+        </div>
+        <div class="modal-acciones">
+          <button type="button" class="btn btn-ghost" id="modalCancelar">Seguir aquí</button>
+          <button type="button" class="btn ${peligro ? 'btn-danger' : 'btn-primary'}" id="modalOk">${esc(confirmar)}</button>
+        </div>
+      </div>
+    </div>`;
+  const cerrar = () => { $('modalSlot').innerHTML = ''; document.removeEventListener('keydown', onEsc); };
+  const onEsc = e => { if(e.key === 'Escape') cerrar(); };
+  document.addEventListener('keydown', onEsc);
+  $('modalCancelar').addEventListener('click', cerrar);
+  $('modalBg').addEventListener('click', e => { if(e.target.id === 'modalBg') cerrar(); });
+  $('modalOk').addEventListener('click', () => { cerrar(); onConfirmar(); });
+  $('modalOk').focus();
+}
+
+/* =========================================================================
+   ENVÍO
+   ========================================================================= */
+function enviar(){
+  for(const n of [1,2,3]){
+    if(!pasoValido(n)){
+      state.touched[n] = true;
+      irAPaso(n);
+      scrollAlPrimerError(n);
+      mostrarToast('<b>No se pudo enviar la solicitud.</b><br>Hay campos obligatorios sin diligenciar.', true);
+      return;
+    }
+  }
+  if(state.enviando) return;
+  state.enviando = true;
+  const btn = $('btnAdelante');
+  btn.disabled = true;
+  $('btnAdelanteTxt').textContent = 'Enviando...';
+  $('btnAdelanteIcon').outerHTML = '<span class="spin" id="btnAdelanteIcon"></span>';
+
+  setTimeout(() => {
+    state.enviando = false;
+    state.radicado = true;
+    btn.disabled = false;
+    registrarSolicitudParaFuncionario();
+    registrarSolicitudParaEstudiante();
+    $('okRad').textContent = RADICADO;
+    $('okAsig').textContent = `${state.asigNombre}${state.asigCodigo ? ' (' + state.asigCodigo + ')' : ''}`;
+    $('okFecha').textContent = fmtFechaHora(new Date());
+    $('form').hidden = true;
+    $('done').hidden = false;
+    window.scrollTo({top:0, behavior:'smooth'});
+    mostrarToast('<b>Solicitud radicada.</b><br>Radicado ' + RADICADO + '. Consulta su avance en el módulo de Respuestas.');
+  }, 1100);
+}
+
+function anexosDeLaSolicitud(){
+  const lista = [];
+  if(state.firmaDocente) lista.push(state.firmaDocente.name);
+  if(state.tipoCausa === 'cruce' && state.firmaDocenteCruce) lista.push(state.firmaDocenteCruce.name);
+  if(state.anexo) lista.push(state.anexo.name);
+  return lista;
+}
+
+/* PRUEBAS: comparte la solicitud radicada con funcionario.html (vía localStorage).
+   Entra en la bandeja del Funcionario como Pendiente, sin decisión ni resolución:
+   el Examen Supletorio no genera resolución. No hay backend real. */
+function registrarSolicitudParaFuncionario(){
+  try{
+    const KEY = 'acbb_solicitudes_nuevas';
+    const registro = {
+      rad: RADICADO,
+      est: SESION.nombre,
+      doc: SESION.documento,
+      prog: SESION.programa,
+      proc: 'Examen Supletorio',
+      fecha: new Date().toISOString(),
+      estado: 'Pendiente',
+      responsable: 'Funcionario',
+      decision: '',
+      examen: `${state.asigNombre} (${state.asigCodigo})${state.asigGrupo ? ', Grupo ' + state.asigGrupo : ''}`,
+      fechaExamen: state.fechaNoPresentado,
+      propuesta: state.fechaPropuesta,
+      causa: state.tipoCausa === 'cruce' ? 'Cruce con el examen de otra asignatura' : 'Otra causa justificada',
+      just: state.tipoCausa === 'cruce'
+        ? `Cruce con ${state.cruceNombre || 'otra asignatura'}${state.cruceCodigo ? ' (' + state.cruceCodigo + ')' : ''}, examen presentado el ${state.cruceFecha ? fmtFecha(state.cruceFecha) : '—'}.`
+        : (state.descripcion || 'Sin descripción.'),
+      anexos: anexosDeLaSolicitud()
+    };
+    const actuales = JSON.parse(localStorage.getItem(KEY) || '[]').filter(r => r.rad !== registro.rad);
+    actuales.push(registro);
+    localStorage.setItem(KEY, JSON.stringify(actuales));
+  }catch(err){ /* almacenamiento no disponible: no afecta el resto del mockup */ }
+}
+
+/* PRUEBAS: comparte la solicitud radicada con estudiante.html (vía localStorage).
+   El estudiante la ve "En Gestión" porque el turno es del Funcionario. */
+function registrarSolicitudParaEstudiante(){
+  try{
+    const KEY = 'acbb_solicitudes_estudiante_nuevas';
+    const fechaTxt = fmtFecha(isoHoy());
+    const registro = {
+      rad: RADICADO,
+      proc: 'Examen Supletorio',
+      fecha: new Date().toISOString(),
+      estado: 'En Gestión',
+      detalle: `${state.asigNombre} (${state.asigCodigo})`,
+      just: state.tipoCausa === 'cruce' ? 'Cruce con el examen de otra asignatura' : (state.descripcion || 'Sin descripción.'),
+      anexos: anexosDeLaSolicitud(),
+      timeline:[
+        {t:'Solicitud radicada',                 d: fechaTxt,   s:'done'},
+        {t:'En Gestión (revisión y decisión)',   d:'En curso',  s:'current'},
+        {t:'Pendiente de Pago (recibo y comprobante)', d:'Pendiente', s:'pendiente'},
+        {t:'Respuesta al Estudiante',            d:'Pendiente', s:'pendiente'}
+      ]
+    };
+    const actuales = JSON.parse(localStorage.getItem(KEY) || '[]').filter(r => r.rad !== registro.rad);
+    actuales.push(registro);
+    localStorage.setItem(KEY, JSON.stringify(actuales));
+  }catch(err){ /* almacenamiento no disponible: no afecta el resto del mockup */ }
+}
+
+/* =========================================================================
+   TOAST
+   ========================================================================= */
+let toastTimer = null;
+function mostrarToast(html, esError){
+  const t = $('toast');
+  $('toastText').innerHTML = html;
+  t.classList.toggle('is-error', !!esError);
+  $('toastIcon').innerHTML = esError
+    ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>'
+    : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5.5 5.5L20 7"/></svg>';
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 5500);
+}
+
+/* =========================================================================
+   EVENTOS GLOBALES
+   ========================================================================= */
+$('btnGate').addEventListener('click', () => {
+  $('gate').hidden = true;
+  $('form').hidden = false;
+  render();
+});
+$('btnDescargarFirmaGate').addEventListener('click', descargarPlantillaPrincipal);
+$('btnDescargarFirmaCruceGate').addEventListener('click', descargarPlantillaCruce);
+$('btnAdelante').addEventListener('click', adelante);
+$('btnAtras').addEventListener('click', atras);
+document.querySelectorAll('.step').forEach(b => {
+  b.addEventListener('click', () => {
+    const n = Number(b.dataset.step);
+    if(n <= state.maxPasoVisto) irAPaso(n);
+  });
+});
+
+/* Menú de usuario */
+const userMenuBtn = $('userMenuBtn'), userDropdown = $('userDropdown');
+userMenuBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  const abierto = !userDropdown.hidden;
+  userDropdown.hidden = abierto;
+  userMenuBtn.setAttribute('aria-expanded', String(!abierto));
+});
+document.addEventListener('click', e => {
+  if(!userDropdown.hidden && !e.target.closest('.user-chip')){
+    userDropdown.hidden = true;
+    userMenuBtn.setAttribute('aria-expanded','false');
+  }
+});
+$('btnLogout').addEventListener('click', () => {
+  userDropdown.hidden = true;
+  mostrarToast('<b>Sesión cerrada.</b><br>Has salido de Gestión de Procesos Académicos FIET.');
+});
+
+/* Aviso de pérdida de datos */
+window.addEventListener('beforeunload', e => {
+  if(!state.radicado && !$('form').hidden && hayDatos()){ e.preventDefault(); e.returnValue = ''; }
+});
+
+/* Arranque */
+aplicarEscenario();
+</script>
+</body>
+</html>

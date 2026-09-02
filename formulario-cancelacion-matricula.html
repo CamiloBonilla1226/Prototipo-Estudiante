@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cancelación de Matrícula — Gestión de Procesos Académicos FIET</title>
+<style>
+  :root{
+    --navy-900:#1B2660;
+    --navy-800:#232F6E;
+    --navy-700:#2A3A86;
+    --navy-ink:#1F2A6D;
+    --accent:#B23B2E;
+    --link:#2F6FD0;
+    --amber:#E0952B;
+    --state-blue:#3B6FD4;
+    --green:#2E9E6B;
+    --red:#D0463B;
+    --panel:#F4F5F8;
+    --line:#E3E6EC;
+    --line-soft:#EDEFF3;
+    --text:#2C3038;
+    --muted:#6E7480;
+    --zebra:#FAFBFC;
+    --sidebar-w:210px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"Segoe UI","Nunito Sans",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+    color:var(--text);background:#fff;font-size:14px;-webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit;}
+
+  /* ---------- Layout ---------- */
+  .app{display:flex;min-height:100vh;}
+  .sidebar{width:var(--sidebar-w);flex:0 0 var(--sidebar-w);background:var(--navy-900);display:flex;flex-direction:column;}
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+
+  /* ---------- Sidebar ---------- */
+  .crest{height:112px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(255,255,255,.10);}
+  .crest img{display:block;object-fit:contain;}
+  .nav{padding:22px 0 0 0;}
+  .nav-item{
+    width:100%;display:flex;align-items:center;gap:11px;padding:11px 16px;
+    background:none;border:0;cursor:pointer;color:#EDEFF6;font-size:13.5px;
+    text-align:left;border-left:3px solid transparent;text-decoration:none;
+  }
+  .nav-item:hover{background:rgba(255,255,255,.07);}
+  .nav-item.is-active{background:rgba(255,255,255,.11);border-left-color:#fff;font-weight:600;}
+  .nav-item .bar{opacity:.55;}
+  .nav-item:focus-visible{outline:2px solid #9FB6FF;outline-offset:-2px;}
+
+  /* ---------- Topbar ---------- */
+  .topbar{height:82px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;border-bottom:1px solid var(--line);background:#fff;}
+  .app-title{font-size:19px;font-weight:700;color:var(--navy-ink);letter-spacing:.1px;margin:0;}
+  .user-chip{position:relative;display:flex;align-items:center;}
+  .user-chip-btn{display:flex;align-items:center;gap:11px;background:none;border:0;cursor:pointer;padding:6px 8px;border-radius:5px;font-family:inherit;}
+  .user-chip-btn:hover{background:var(--panel);}
+  .avatar{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--navy-ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12.5px;color:var(--navy-ink);}
+  .user-meta{line-height:1.35;text-align:left;}
+  .user-name{font-weight:700;font-size:13px;color:var(--navy-ink);}
+  .user-role{font-size:12.5px;color:var(--navy-ink);display:flex;align-items:center;gap:5px;}
+  .user-chip-btn[aria-expanded="true"] .user-role svg{transform:rotate(180deg);}
+  .user-dropdown{position:absolute;top:calc(100% + 6px);right:0;min-width:190px;background:#fff;border:1px solid var(--line);border-radius:5px;box-shadow:0 12px 28px rgba(20,26,56,.2);padding:6px;z-index:60;}
+  .user-dropdown-item{width:100%;display:flex;align-items:center;gap:10px;background:none;border:0;padding:10px 11px;border-radius:3px;font-size:13px;font-weight:600;color:var(--red);cursor:pointer;text-align:left;font-family:inherit;}
+  .user-dropdown-item:hover{background:#FBE9E7;}
+
+  /* ---------- Content ---------- */
+  .content{flex:1;padding:16px 26px 0;}
+  .crumbs{font-size:12.5px;color:var(--muted);margin-bottom:22px;}
+  .crumbs b{color:var(--navy-ink);font-weight:600;}
+  .crumbs a{color:var(--navy-ink);font-weight:600;text-decoration:none;}
+  .crumbs a:hover{text-decoration:underline;}
+  .crumbs span{margin:0 7px;color:var(--navy-ink);font-weight:700;}
+  .section-tab{display:inline-block;font-size:15px;font-weight:600;color:var(--navy-ink);padding-bottom:7px;border-bottom:3px solid var(--accent);margin-bottom:26px;}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:3px;box-shadow:0 1px 3px rgba(27,38,96,.06);max-width:1020px;margin:0 auto 26px;}
+  .card-head{display:flex;align-items:center;gap:10px;padding:15px 18px;border-bottom:1px solid var(--line-soft);}
+  .card-head h2{margin:0;font-size:15px;font-weight:700;color:var(--navy-ink);}
+  .card-body{padding:20px 22px;}
+
+  /* ---------- Stepper ---------- */
+  .stepper{display:flex;max-width:1020px;margin:0 auto 22px;background:#fff;border:1px solid var(--line);border-radius:3px;box-shadow:0 1px 3px rgba(27,38,96,.06);padding:18px 14px 14px;}
+  .step{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;position:relative;background:none;border:0;cursor:default;padding:0 4px;font-family:inherit;}
+  .step.clickable{cursor:pointer;}
+  .step::after{content:'';position:absolute;top:15px;left:calc(50% + 20px);right:calc(-50% + 20px);height:2px;background:var(--line);}
+  .step:last-child::after{display:none;}
+  .step.is-done::after{background:var(--green);}
+  .step-num{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;background:#fff;border:2px solid var(--line);color:#A9AFBB;position:relative;z-index:1;}
+  .step-label{font-size:11.5px;font-weight:600;color:var(--muted);text-align:center;line-height:1.35;}
+  .step.is-current .step-num{background:var(--navy-700);border-color:var(--navy-700);color:#fff;}
+  .step.is-current .step-label{color:var(--navy-ink);font-weight:700;}
+  .step.is-done .step-num{background:var(--green);border-color:var(--green);color:#fff;}
+  .step.is-done .step-label{color:var(--navy-ink);}
+  .step.is-error .step-num{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .step.is-error .step-label{color:var(--accent);}
+
+  /* ---------- Form ---------- */
+  .paso-title{margin:0 0 4px;font-size:16px;font-weight:700;color:var(--navy-ink);}
+  .paso-intro{margin:0 0 20px;font-size:13px;color:var(--muted);line-height:1.6;}
+  .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px 20px;}
+  .fld{display:flex;flex-direction:column;gap:6px;}
+  .fld.wide{grid-column:1 / -1;}
+  .fld label{font-size:12.5px;font-weight:600;color:var(--navy-ink);}
+  .req{color:var(--accent);}
+  .fld input[type=text],.fld input[type=date],.fld select,.fld textarea{
+    border:1px solid var(--line);border-radius:3px;padding:9px 11px;font-size:13px;
+    color:var(--text);background:#fff;font-family:inherit;width:100%;
+  }
+  .fld input[type=text]:focus,.fld input[type=date]:focus,.fld select:focus,.fld textarea:focus{
+    outline:2px solid #B9C7EE;outline-offset:0;border-color:var(--navy-700);
+  }
+  .fld textarea{resize:vertical;min-height:120px;line-height:1.6;}
+  .fld .hint{font-size:11.8px;color:var(--muted);line-height:1.5;}
+  .fld.readonly input{background:var(--panel);color:var(--muted);cursor:not-allowed;}
+  .fld.has-error input,.fld.has-error select,.fld.has-error textarea{border-color:var(--accent);background:#FFF7F6;}
+  .err{font-size:12px;color:var(--accent);font-weight:600;display:none;}
+  .fld.has-error .err{display:block;}
+  .counter{font-size:11.5px;color:var(--muted);text-align:right;}
+  .counter.bad{color:var(--accent);font-weight:700;}
+  .foot-note{margin:18px 0 0;font-size:12px;color:var(--muted);background:var(--panel);border-radius:3px;padding:11px 13px;line-height:1.6;}
+
+  /* ---------- Alertas ---------- */
+  .alert{display:flex;gap:11px;align-items:flex-start;border-radius:3px;padding:12px 14px;font-size:12.8px;line-height:1.6;margin-bottom:16px;}
+  .alert svg{flex:0 0 auto;margin-top:1px;}
+  .alert b{display:block;margin-bottom:2px;}
+  .alert-warn{background:#FFF8E9;border:1px solid #F0DEB4;color:#7A5B1B;}
+  .alert-danger{background:#FBE9E7;border:1px solid #F0C4BF;color:#8A2C22;}
+  .alert-info{background:#EAF0FE;border:1px solid #C6D6F5;color:#25407E;}
+
+  /* ---------- Tabla asignaturas ---------- */
+  .table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:3px;}
+  table{width:100%;border-collapse:collapse;min-width:640px;}
+  thead th{background:var(--navy-700);color:#fff;font-size:12.5px;font-weight:600;text-align:left;padding:11px 12px;white-space:nowrap;border-right:1px solid rgba(255,255,255,.14);}
+  thead th:last-child{border-right:0;}
+  tbody td{padding:11px 12px;font-size:12.8px;border-bottom:1px solid var(--line-soft);border-right:1px solid var(--line-soft);}
+  tbody td:last-child{border-right:0;}
+  tbody tr:last-child td{border-bottom:0;}
+  tbody tr:nth-child(even){background:var(--zebra);}
+  tfoot td{padding:11px 12px;font-size:12.8px;font-weight:700;color:var(--navy-ink);background:#F1F4FB;border-top:1px solid var(--line);}
+  .num{text-align:right;font-variant-numeric:tabular-nums;}
+  .tbl-input{width:100%;border:1px solid var(--navy-700);border-radius:3px;padding:5px 7px;font-size:12.8px;font-family:inherit;color:var(--text);background:#fff;}
+  .tbl-input:focus{outline:none;box-shadow:0 0 0 2px #B9C7EE;}
+  .asig-view{display:block;padding:5px 7px;color:var(--text);}
+  .asig-acciones{white-space:nowrap;}
+  .asig-btns{display:flex;gap:6px;justify-content:flex-end;}
+  .icon-btn{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:#fff;border-radius:3px;padding:6px 10px;font-size:12px;font-weight:600;font-family:inherit;color:var(--navy-ink);cursor:pointer;}
+  .icon-btn:hover{background:var(--panel);}
+  .icon-btn-ok{border-color:#BFE6D2;color:#1F6B4A;background:#E4F5EC;}
+  .icon-btn-ok:hover{background:#D6EEE0;}
+  .icon-btn-danger{border-color:#F0C4BF;color:#8A2C22;}
+  .icon-btn-danger:hover{background:#FBE9E7;}
+  .tbl-empty{text-align:center;color:var(--muted);font-size:12.8px;padding:22px 12px;}
+  .cod{font-weight:600;color:var(--navy-ink);white-space:nowrap;}
+
+  /* ---------- Documentos ---------- */
+  .doc{border:1px solid var(--line);border-radius:3px;margin-bottom:12px;overflow:hidden;}
+  .doc.has-error{border-color:var(--accent);}
+  .doc-head{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--panel);border-bottom:1px solid var(--line);}
+  .doc-n{width:22px;height:22px;border-radius:50%;background:var(--navy-700);color:#fff;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .doc-titles{flex:1;min-width:0;}
+  .doc-name{font-size:13px;font-weight:700;color:var(--navy-ink);}
+  .doc-ent{font-size:11.8px;color:var(--muted);}
+  .doc-body{padding:14px;display:grid;grid-template-columns:200px 1fr;gap:14px;align-items:start;}
+  .doc-body-solo{grid-template-columns:1fr;max-width:380px;margin:0 auto;}
+  .upload-zone{display:flex;flex-direction:column;align-items:center;gap:7px;border:1.5px dashed #C3CAD9;border-radius:3px;padding:18px 14px;cursor:pointer;text-align:center;background:#FBFCFE;}
+  .upload-zone:hover{border-color:var(--navy-700);background:#F4F6FB;}
+  .upload-zone span{font-size:12px;color:var(--muted);line-height:1.5;}
+  .upload-zone b{color:var(--navy-ink);}
+  .file-ok{display:flex;align-items:center;gap:9px;background:#E4F5EC;border:1px solid #BFE6D2;border-radius:3px;padding:10px 12px;font-size:12.5px;color:#1F6B4A;}
+  .file-ok .fname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;}
+  .link-btn{background:none;border:0;color:var(--link);font-size:12.3px;font-weight:600;cursor:pointer;padding:0;}
+  .link-btn:hover{text-decoration:underline;}
+  .vig{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;padding:6px 10px;border-radius:20px;margin-top:8px;}
+  .vig-dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto;}
+  .vig-ok{background:#E4F5EC;color:#1F6B4A;} .vig-ok .vig-dot{background:var(--green);}
+  .vig-warn{background:#FDF3E3;color:#8A6218;} .vig-warn .vig-dot{background:var(--amber);}
+  .vig-bad{background:#FBE9E7;color:#8A2C22;} .vig-bad .vig-dot{background:var(--red);}
+
+  /* ---------- Revisión ---------- */
+  .rev{border:1px solid var(--line);border-radius:3px;margin-bottom:14px;}
+  .rev-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;background:var(--panel);border-bottom:1px solid var(--line);}
+  .rev-head h3{margin:0;font-size:12.5px;font-weight:700;color:var(--navy-ink);text-transform:uppercase;letter-spacing:.5px;}
+  .rev-body{padding:14px;}
+  .dl{display:grid;grid-template-columns:200px 1fr;gap:9px 14px;font-size:13px;}
+  .dl dt{color:var(--muted);font-weight:600;}
+  .dl dd{margin:0;color:var(--text);}
+  .just{background:var(--panel);border-left:3px solid var(--navy-700);padding:11px 13px;font-size:13px;line-height:1.6;border-radius:0 3px 3px 0;}
+  .lista-docs{list-style:none;margin:0;padding:0;}
+  .lista-docs li{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--line-soft);font-size:12.8px;}
+  .lista-docs li:last-child{border-bottom:0;}
+  .check{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:3px;padding:14px;font-size:13px;line-height:1.6;}
+  .check.has-error{border-color:var(--accent);background:#FFF7F6;}
+  .check input{margin-top:2px;width:16px;height:16px;flex:0 0 auto;accent-color:var(--navy-700);}
+
+  /* ---------- Acciones ---------- */
+  .acciones{display:flex;justify-content:space-between;gap:12px;padding:16px 22px;border-top:1px solid var(--line-soft);background:#FCFCFD;flex-wrap:wrap;}
+  .btn{height:38px;padding:0 18px;border-radius:3px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid transparent;display:inline-flex;align-items:center;gap:8px;text-decoration:none;}
+  .btn-ghost{background:#fff;border-color:#B7BCC6;color:var(--navy-ink);}
+  .btn-ghost:hover{background:#EEF1F9;border-color:var(--navy-700);}
+  .btn-primary{background:var(--navy-700);color:#fff;}
+  .btn-primary:hover{background:#31439B;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .btn:focus-visible{outline:2px solid #B9C7EE;outline-offset:2px;}
+
+  /* ---------- Confirmación ---------- */
+  .ok-wrap{max-width:640px;margin:0 auto;text-align:center;padding:44px 26px 40px;}
+  .ok-icon{width:66px;height:66px;border-radius:50%;background:#E4F5EC;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;}
+  .ok-wrap h2{margin:0 0 8px;font-size:19px;color:var(--navy-ink);}
+  .ok-wrap > p{margin:0 auto 24px;font-size:13.5px;color:var(--muted);line-height:1.65;max-width:460px;}
+  .ok-box{border:1px solid var(--line);border-radius:3px;text-align:left;margin-bottom:22px;}
+  .ok-box .dl{padding:16px;grid-template-columns:190px 1fr;}
+  .rad-big{font-size:15px;font-weight:700;color:var(--navy-ink);font-variant-numeric:tabular-nums;letter-spacing:.4px;}
+  .chip-estado{display:inline-block;padding:4px 11px;border-radius:20px;font-size:12px;font-weight:700;background:#EAF0FE;color:var(--state-blue);}
+
+  /* ---------- Spinner ---------- */
+  .spin{width:15px;height:15px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;}
+  @keyframes sp{to{transform:rotate(360deg);}}
+
+  /* ---------- Footer ---------- */
+  footer{border-top:1px solid var(--line);padding:18px 26px 22px;text-align:center;font-size:11.5px;color:var(--muted);line-height:1.9;background:#fff;}
+
+  /* ---------- Toast ---------- */
+  .toast{position:fixed;right:22px;bottom:22px;max-width:380px;z-index:100;background:#1B2660;color:#fff;border-radius:6px;border-left:5px solid var(--green);box-shadow:0 14px 34px rgba(20,26,56,.4);padding:15px 18px;display:flex;gap:12px;align-items:flex-start;opacity:0;transform:translateY(10px) scale(.98);pointer-events:none;transition:opacity .22s ease,transform .22s ease;}
+  .toast.show{opacity:1;transform:translateY(0) scale(1);}
+  .toast.is-error{border-left-color:var(--red);}
+  .toast-icon{flex:0 0 auto;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-top:1px;background:var(--green);}
+  .toast.is-error .toast-icon{background:var(--red);}
+  .toast-text{font-size:13.2px;line-height:1.6;}
+
+  @media (max-width:860px){
+    :root{--sidebar-w:64px;}
+    .nav-item span.label{display:none;}
+    .nav-item{justify-content:center;padding:13px 0;}
+    .nav-item .bar{display:none;}
+    .app-title{font-size:15px;}
+    .step-label{display:none;}
+    .doc-body{grid-template-columns:1fr;}
+    .dl{grid-template-columns:1fr;gap:3px 0;}
+    .dl dd{margin-bottom:8px;}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <div class="crest">
+      <img src="img/escudo.png" width="90" height="90" alt="Escudo Universidad del Cauca">
+    </div>
+    <nav class="nav">
+      <a class="nav-item" href="estudiante.html">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3"/><path d="M6.5 19a6 6 0 0 1 11 0"/></svg>
+        <span class="bar">|</span><span class="label">Mi usuario</span>
+      </a>
+      <a class="nav-item is-active" href="estudiante.html">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
+        <span class="bar">|</span><span class="label">Solicitudes</span>
+      </a>
+      <a class="nav-item" href="estudiante.html">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"><path d="M4 4l16 8-16 8 3-8-3-8z"/></svg>
+        <span class="bar">|</span><span class="label">Respuestas</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- ===================== MAIN ===================== -->
+  <div class="main">
+    <header class="topbar">
+      <h1 class="app-title">Gestión de Procesos Académicos FIET</h1>
+      <div class="user-chip">
+        <button class="user-chip-btn" id="userMenuBtn" aria-haspopup="true" aria-expanded="false">
+          <div class="avatar">NS</div>
+          <div class="user-meta">
+            <div class="user-name">Nicolás Salazar</div>
+            <div class="user-role">Estudiante
+              <svg width="9" height="6" viewBox="0 0 10 6" fill="none" stroke="#1F2A6D" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg>
+            </div>
+          </div>
+        </button>
+        <div class="user-dropdown" id="userDropdown" hidden>
+          <button class="user-dropdown-item" id="btnLogout" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B23B2E" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="crumbs">
+        <b>Estudiante</b><span>&gt;</span><a href="estudiante.html">Solicitudes</a><span>&gt;</span><b>Cancelación de Matrícula</b>
+      </div>
+      <div class="section-tab">Cancelación de Matrícula</div>
+
+      <!-- ===================== PASO 0: VERIFICACIÓN DE PROCEDENCIA ===================== -->
+      <section id="gate" hidden>
+        <div class="card" style="max-width:760px;">
+          <div class="card-head">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2A3A86" stroke-width="1.6"><path d="M12 3l8 3v6c0 4.5-3.2 7.9-8 9-4.8-1.1-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg>
+            <h2>Verificación de procedencia</h2>
+          </div>
+          <div class="card-body">
+            <p class="paso-intro" style="margin-bottom:18px;">Antes de diligenciar la solicitud, la aplicación verifica que el trámite proceda para tu situación actual.</p>
+            <div id="gateAlerts"></div>
+            <div id="gateOk" class="alert alert-info" hidden>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#25407E" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01" stroke-linecap="round"/></svg>
+              <div><b>El trámite procede</b>Puedes continuar con el diligenciamiento de la solicitud. El plazo para radicar vence el <b id="gateFecha" style="display:inline;"></b>.</div>
+            </div>
+          </div>
+          <div class="acciones">
+            <a class="btn btn-ghost" href="estudiante.html">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1F2A6D" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+              Volver al catálogo
+            </a>
+            <button class="btn btn-primary" id="btnGate">
+              Continuar
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== FORMULARIO ===================== -->
+      <section id="form" hidden>
+
+        <div class="stepper" id="stepper">
+          <button class="step" data-step="1"><span class="step-num">1</span><span class="step-label">Información del solicitante</span></button>
+          <button class="step" data-step="2"><span class="step-num">2</span><span class="step-label">Documentación</span></button>
+          <button class="step" data-step="3"><span class="step-num">3</span><span class="step-label">Motivo de la cancelación</span></button>
+          <button class="step" data-step="4"><span class="step-num">4</span><span class="step-label">Asignaturas del periodo</span></button>
+          <button class="step" data-step="5"><span class="step-num">5</span><span class="step-label">Revisión y envío</span></button>
+        </div>
+
+        <div class="card">
+          <div class="card-body" id="pasoBody"></div>
+          <div class="acciones">
+            <button class="btn btn-ghost" id="btnAtras">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1F2A6D" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+              <span id="btnAtrasTxt">Atrás</span>
+            </button>
+            <button class="btn btn-primary" id="btnAdelante">
+              <span id="btnAdelanteTxt">Continuar</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" id="btnAdelanteIcon"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== CONFIRMACIÓN ===================== -->
+      <section id="done" hidden>
+        <div class="card">
+          <div class="ok-wrap">
+            <div class="ok-icon">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#2E9E6B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 7"/></svg>
+            </div>
+            <h2>Solicitud radicada correctamente</h2>
+            <p>Tu solicitud de Cancelación de Matrícula fue recibida. Podrás consultar su estado en el módulo de Respuestas. La decisión será notificada a tu correo institucional.</p>
+            <div class="ok-box">
+              <dl class="dl">
+                <dt>Número de radicado</dt><dd><span class="rad-big" id="okRad"></span></dd>
+                <dt>Tipo de proceso académico</dt><dd>Cancelación de Matrícula</dd>
+                <dt>Fecha de radicación</dt><dd id="okFecha"></dd>
+                <dt>Estado actual</dt><dd><span class="chip-estado">En trámite</span></dd>
+              </dl>
+            </div>
+            <a class="btn btn-primary" href="estudiante.html#respuestas" style="justify-content:center;">
+              Ir a mis trámites radicados
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <footer>
+      2026 &nbsp;|&nbsp; Gestión de Procesos Académicos FIET &nbsp;|&nbsp; Facultad de Ingeniería Electrónica y Telecomunicaciones<br>
+      División de Tecnologías de la Información y las Comunicaciones &nbsp;|&nbsp; Versión 1.0.0
+    </footer>
+  </div>
+</div>
+
+<!-- ===================== TOAST ===================== -->
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <div class="toast-icon" id="toastIcon">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 7"/></svg>
+  </div>
+  <div class="toast-text" id="toastText"></div>
+</div>
+
+<script>
+/* =========================================================================
+   DATOS SIMULADOS
+   El prototipo no se integra con ningún sistema externo.
+   ========================================================================= */
+
+/* Origen en la implementación definitiva: sesión del usuario autenticado */
+const SESION = {
+  nombre:'Nicolás Salazar',
+  nombres:'Nicolás',
+  apellidos:'Salazar',
+  codigo:'104620145078',
+  documento:'1004556612',
+  tipoDocumento:'Cédula de Ciudadanía',
+  programa:'Ingeniería de Sistemas',
+  facultad:'Facultad de Ingeniería Electrónica y Telecomunicaciones',
+  periodoCarrera:7,
+  correo:'nsalazar@unicauca.edu.co',
+  intervencionPsicosocialRealizada:true
+};
+
+/* Origen en la implementación definitiva: registro académico (SIMCA) */
+const MATRICULA = {
+  periodoAcademico:'2026-2',
+  ultimoDiaDeClases:'2026-11-27',
+  asignaturas:[
+    {codigo:'TEL-3204', nombre:'Comunicaciones Digitales',        creditos:4, faltas:2, nota:3.8},
+    {codigo:'TEL-3311', nombre:'Redes de Computadores',           creditos:4, faltas:6, nota:2.6},
+    {codigo:'ELE-3108', nombre:'Procesamiento Digital de Señales', creditos:3, faltas:0, nota:4.1},
+    {codigo:'ELE-3220', nombre:'Electrónica de Potencia',          creditos:3, faltas:1, nota:3.4},
+    {codigo:'HUM-1105', nombre:'Ética y Sociedad',                 creditos:2, faltas:3, nota:3.0}
+  ]
+};
+
+/* Vacío = el estudiante puede radicar. Un elemento = bloqueo por duplicado. */
+let SOLICITUDES_EN_CURSO = [];
+
+/* PENDIENTE: convención del número de radicado por confirmar. */
+const RADICADO = '2026-CM-0152';
+
+/* PENDIENTE: se asume que el sistema genera el formato PA-GA-4.2-FOR-14.
+   Si el estudiante debe descargarlo, firmarlo y cargarlo, agregar un
+   séptimo documento a este arreglo. */
+const DOCUMENTOS = [
+  {id:1, nombre:'Paz y salvo',   entidad:'División de Bibliotecas',              fecha:false, formatos:['pdf']},
+  {id:2, nombre:'Paz y salvo',   entidad:'División de Deportes y Recreación',    fecha:false, formatos:['pdf']},
+  {id:3, nombre:'Paz y salvo',   entidad:'División de Salud Integral',           fecha:false, formatos:['pdf']},
+  {id:4, nombre:'Cupón de Confirmación de la Intervención Psicosocial', entidad:'División de Salud Integral', fecha:false, formatos:['pdf']},
+  {id:5, nombre:'Paz y salvo',   entidad:'División Financiera',                  fecha:false, formatos:['pdf']},
+  {id:6, nombre:'Carné estudiantil o constancia de no trámite',         entidad:'DARCA',                      fecha:false, formatos:['pdf','jpg','jpeg','png'], requerido:false}
+];
+
+const MAX_MB = 5;
+const VIGENCIA_DIAS = 5;
+
+/* PRUEBAS: mientras esté en true, no exige adjuntar archivos en Documentación ni diligenciar el motivo de cancelación para avanzar. Poner en false para el prototipo final. */
+const MODO_PRUEBA_SIN_ARCHIVOS = true;
+
+/* PRUEBAS: mientras esté en true, los paz y salvo y el cupón (documentos 1 a 5) aparecen ya adjuntados en Revisión y envío, simulando que el estudiante sí los subió. Poner en false para el prototipo final. */
+const MODO_PRUEBA_PAZYSALVO_ADJUNTADOS = true;
+
+/* =========================================================================
+   ESTADO DEL FORMULARIO (en memoria, sin almacenamiento del navegador)
+   ========================================================================= */
+const state = {
+  paso:1,
+  maxPasoVisto:1,
+  descripcion:'',
+  soporte:null,
+  docs:{},           // {id:{file:{name,size}, fecha:'YYYY-MM-DD'}}
+  declara:false,
+  touched:{},        // pasos ya validados con error
+  enviando:false,
+  asigEditando:new Set()  // índices de MATRICULA.asignaturas en edición
+};
+DOCUMENTOS.forEach(d => state.docs[d.id] = {file:null, fecha:''});
+if(MODO_PRUEBA_PAZYSALVO_ADJUNTADOS){
+  [1,2,3,4,5].forEach(id => {
+    const d = DOCUMENTOS.find(x => x.id === id);
+    state.docs[id].file = {name: (d.nombre + '_' + d.entidad).replace(/\s+/g,'_') + '.pdf', size: 245000};
+  });
+}
+
+/* =========================================================================
+   UTILIDADES
+   ========================================================================= */
+const $ = id => document.getElementById(id);
+const hoy = () => { const d = new Date(); d.setHours(0,0,0,0); return d; };
+
+function fmtFecha(iso){
+  const [a,m,d] = iso.split('-');
+  return `${d}/${m}/${a}`;
+}
+function fmtFechaLarga(iso){
+  const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const [a,m,d] = iso.split('-');
+  return `${Number(d)} de ${MESES[Number(m)-1]} de ${a}`;
+}
+function fmtFechaHora(dt){
+  const p = n => String(n).padStart(2,'0');
+  return `${p(dt.getDate())}/${p(dt.getMonth()+1)}/${dt.getFullYear()} ${p(dt.getHours())}:${p(dt.getMinutes())}`;
+}
+function fmtTam(bytes){
+  return bytes < 1024*1024 ? `${Math.max(1,Math.round(bytes/1024))} KB` : `${(bytes/1048576).toFixed(1)} MB`;
+}
+function extDe(nombre){
+  const p = nombre.split('.');
+  return p.length > 1 ? p.pop().toLowerCase() : '';
+}
+function esc(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function diasDesde(iso){
+  const [a,m,d] = iso.split('-').map(Number);
+  const f = new Date(a, m-1, d); f.setHours(0,0,0,0);
+  return Math.floor((hoy() - f) / 86400000);
+}
+/* Estado de vigencia de un paz y salvo: ok | warn | vencido | futura | vacia */
+function vigenciaDe(iso){
+  if(!iso) return {tipo:'vacia'};
+  const dias = diasDesde(iso);
+  if(dias < 0) return {tipo:'futura'};
+  if(dias > VIGENCIA_DIAS) return {tipo:'vencido', dias};
+  const [a,m,d] = iso.split('-').map(Number);
+  const venc = new Date(a, m-1, d + VIGENCIA_DIAS);
+  const p = n => String(n).padStart(2,'0');
+  const vencTxt = `${p(venc.getDate())}/${p(venc.getMonth()+1)}/${venc.getFullYear()}`;
+  return dias <= 2 ? {tipo:'ok', dias, vencTxt} : {tipo:'warn', dias, vencTxt};
+}
+
+/* =========================================================================
+   PASO 0 — VERIFICACIÓN DE PROCEDENCIA
+   ========================================================================= */
+function renderGate(){
+  const cont = $('gateAlerts');
+  const bloqueos = [];
+  const avisos = [];
+
+  // Plazo del trámite
+  const vencido = hoy() > new Date(MATRICULA.ultimoDiaDeClases + 'T00:00:00');
+  if(vencido){
+    bloqueos.push({
+      titulo:'El plazo para este trámite ya venció',
+      texto:`La Cancelación de Matrícula solo puede solicitarse hasta el último día de clases del periodo, que fue el <b>${fmtFechaLarga(MATRICULA.ultimoDiaDeClases)}</b>. Si consideras que tu caso es excepcional, acércate a la Decanatura.`
+    });
+  }
+
+  // Solicitud duplicada
+  const duplicada = SOLICITUDES_EN_CURSO.length > 0;
+  if(duplicada){
+    bloqueos.push({
+      titulo:'Ya tienes una solicitud de este trámite en curso',
+      texto:`Existe una solicitud de Cancelación de Matrícula con radicado <b>2026-CM-0151</b> que aún está en trámite. Debes esperar la respuesta antes de radicar una nueva. <a href="estudiante.html" style="color:#8A2C22;font-weight:700;">Ver la solicitud existente</a>.`
+    });
+  }
+
+  // Advertencia de primer periodo de carrera
+  const primerPeriodo = SESION.periodoCarrera === 1;
+  if(primerPeriodo && !bloqueos.length){
+    avisos.push({
+      clase:'alert-danger',
+      titulo:'Advertencia para estudiantes de primer periodo de carrera',
+      texto:'Cursas primer periodo de carrera. Si cancelas la matrícula, solo podrás ingresar de nuevo al programa sometiéndote al proceso de admisión vigente.',
+      confirmar:true
+    });
+  }
+
+  // Intervención psicosocial
+  const psicoPendiente = !SESION.intervencionPsicosocialRealizada;
+  if(psicoPendiente && !bloqueos.length){
+    avisos.push({
+      clase:'alert-warn',
+      titulo:'Intervención psicosocial pendiente',
+      texto:'No registras la Confirmación de la Intervención Psicosocial ante la División de Salud Integral. Puedes continuar diligenciando la solicitud, pero no podrás completar el paso de documentación sin ese cupón.'
+    });
+  }
+
+  let html = '';
+  bloqueos.forEach(b => {
+    html += `<div class="alert alert-danger">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8A2C22" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5h.01" stroke-linecap="round"/></svg>
+      <div><b>${b.titulo}</b>${b.texto}</div></div>`;
+  });
+  avisos.forEach((a,i) => {
+    const stroke = a.clase === 'alert-danger' ? '#8A2C22' : '#7A5B1B';
+    html += `<div class="alert ${a.clase}">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="1.8"><path d="M12 3.5L21.5 20H2.5L12 3.5z" stroke-linejoin="round"/><path d="M12 10v4M12 17h.01" stroke-linecap="round"/></svg>
+      <div><b>${a.titulo}</b>${a.texto}
+      ${a.confirmar ? `<label style="display:flex;gap:9px;align-items:flex-start;margin-top:11px;font-weight:600;">
+        <input type="checkbox" id="gateConfirm" style="margin-top:2px;width:15px;height:15px;accent-color:#B23B2E;">
+        Entiendo la consecuencia y deseo continuar con la solicitud.</label>` : ''}
+      </div></div>`;
+  });
+  cont.innerHTML = html;
+
+  $('gateFecha').textContent = fmtFechaLarga(MATRICULA.ultimoDiaDeClases);
+  $('gateOk').hidden = bloqueos.length > 0 || avisos.length > 0;
+
+  const btn = $('btnGate');
+  const necesitaConfirmar = avisos.some(a => a.confirmar);
+  btn.disabled = bloqueos.length > 0 || necesitaConfirmar;
+
+  const chk = $('gateConfirm');
+  if(chk) chk.addEventListener('change', () => { btn.disabled = !chk.checked; });
+}
+
+/* =========================================================================
+   VALIDACIÓN POR PASO
+   ========================================================================= */
+function erroresPaso(n){
+  const e = [];
+  if(n === 3 && !MODO_PRUEBA_SIN_ARCHIVOS){
+    const len = state.descripcion.trim().length;
+    if(len === 0) e.push({campo:'descripcion', msg:'Este campo es requerido.'});
+    else if(len < 50) e.push({campo:'descripcion', msg:`La descripción debe tener al menos 50 caracteres. Actualmente tiene ${len}.`});
+    else if(len > 1000) e.push({campo:'descripcion', msg:'La descripción no puede superar los 1.000 caracteres.'});
+  }
+  if(n === 2){
+    DOCUMENTOS.forEach(d => {
+      const st = state.docs[d.id];
+      if(!st.file){
+        if(!MODO_PRUEBA_SIN_ARCHIVOS && d.requerido !== false) e.push({campo:'doc'+d.id, msg:'Debe adjuntar este documento.'});
+        return;
+      }
+      if(d.fecha){
+        if(!st.fecha){ e.push({campo:'doc'+d.id, msg:'Debe indicar la fecha de expedición.'}); return; }
+        const v = vigenciaDe(st.fecha);
+        if(v.tipo === 'futura') e.push({campo:'doc'+d.id, msg:'La fecha de expedición no puede ser posterior a hoy.'});
+        if(v.tipo === 'vencido') e.push({campo:'doc'+d.id, msg:`Documento vencido: fue expedido hace ${v.dias} días calendario. Debe solicitar uno nuevo.`});
+      }
+    });
+  }
+  if(n === 5){
+    if(!state.declara) e.push({campo:'declara', msg:'Debe aceptar la declaración de veracidad para radicar la solicitud.'});
+  }
+  return e;
+}
+const pasoValido = n => erroresPaso(n).length === 0;
+
+/* =========================================================================
+   RENDER DEL STEPPER
+   ========================================================================= */
+function renderStepper(){
+  document.querySelectorAll('.step').forEach(b => {
+    const n = Number(b.dataset.step);
+    b.classList.toggle('is-current', n === state.paso);
+    b.classList.toggle('is-done', n < state.paso && pasoValido(n));
+    b.classList.toggle('is-error', n !== state.paso && state.touched[n] && !pasoValido(n));
+    const accesible = n <= state.maxPasoVisto;
+    b.classList.toggle('clickable', accesible);
+    b.disabled = !accesible;
+  });
+}
+
+/* =========================================================================
+   RENDER DE CADA PASO
+   ========================================================================= */
+function campoRO(label, valor, extraClass){
+  return `<div class="fld readonly${extraClass ? ' ' + extraClass : ''}"><label>${label}</label><input type="text" value="${esc(valor)}" readonly tabindex="-1"></div>`;
+}
+
+function renderPaso1(){
+  return `
+    <h2 class="paso-title">Información del solicitante</h2>
+    <p class="paso-intro">Estos datos se toman automáticamente de tu sesión y del registro de matrícula. Verifícalos antes de continuar.</p>
+    <div class="grid-2">
+      ${campoRO('Nombre', SESION.nombre)}
+      ${campoRO('Programa', SESION.programa)}
+      ${campoRO('Semestre', SESION.periodoCarrera + '°')}
+      ${campoRO('Correo institucional', SESION.correo)}
+      ${campoRO('Código', SESION.codigo)}
+      ${campoRO('Facultad', SESION.facultad, 'wide')}
+      ${campoRO('Cédula', SESION.documento)}
+      ${campoRO('Fecha', fmtFecha(new Date().toISOString().slice(0,10)))}
+    </div>
+    <p class="foot-note">Si algún dato es incorrecto, debes corregirlo ante DARCA antes de radicar la solicitud. La información aquí mostrada es la que quedará registrada en el trámite.</p>`;
+}
+
+function renderPaso2(){
+  const errs = state.touched[3] ? erroresPaso(3) : [];
+  const err = c => errs.find(x => x.campo === c);
+  const len = state.descripcion.length;
+  return `
+    <h2 class="paso-title">Motivo de la cancelación</h2>
+    <p class="paso-intro">Explica las razones que sustentan tu solicitud. Esta información será revisada por la Decanatura y sustenta la decisión del Decano.</p>
+
+    <div class="fld ${err('descripcion') ? 'has-error':''}" style="margin-bottom:18px;">
+      <label for="fDesc">Descripción del motivo <span class="req">*</span></label>
+      <textarea id="fDesc" maxlength="1000" placeholder="Describa con claridad las razones que lo llevan a cancelar la matrícula...">${esc(state.descripcion)}</textarea>
+      <div class="counter ${len > 0 && len < 50 ? 'bad':''}" id="cCount">${len} / 1.000 caracteres (mínimo 50)</div>
+      <div class="err">${err('descripcion') ? esc(err('descripcion').msg) : ''}</div>
+    </div>
+
+    <div class="fld">
+      <label>Soporte del motivo <span style="color:var(--muted);font-weight:600;">(opcional)</span></label>
+      <div class="hint" style="margin-bottom:8px;">Si cuentas con un documento que respalde tu motivo (incapacidad médica, certificación laboral u otro), puedes adjuntarlo. Formatos PDF, JPG o PNG. Máximo ${MAX_MB} MB.</div>
+      <div id="soporteSlot">${state.soporte ? fileOkHTML(state.soporte,'soporte') : uploadZoneHTML('soporte','PDF, JPG o PNG')}</div>
+      <input type="file" id="fSoporte" accept=".pdf,.jpg,.jpeg,.png" hidden>
+      <div class="err" id="soporteErr" style="display:none;"></div>
+    </div>`;
+}
+
+function renderPaso3(){
+  const a = MATRICULA.asignaturas;
+  const iconEditar = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`;
+  const iconGuardar = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 7"/></svg>`;
+  const iconEliminar = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>`;
+  return `
+    <h2 class="paso-title">Asignaturas del periodo</h2>
+    <p class="paso-intro">Ingresa el código y el nombre de cada asignatura que tienes matriculada en el periodo ${MATRICULA.periodoAcademico}. La cancelación de matrícula las cubre en su totalidad, por lo que no se seleccionan individualmente. Si te equivocas al escribir una asignatura, usa "Editar" para corregirla o "Eliminar" para quitarla de la lista.</p>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th><th>Asignatura</th><th class="num">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${a.map((x,i) => {
+            const editando = state.asigEditando.has(i);
+            return `<tr>
+            <td class="cod">${editando
+              ? `<input type="text" class="tbl-input" data-asig-codigo="${i}" value="${esc(x.codigo)}" placeholder="Ej. TEL-3204">`
+              : `<span class="asig-view">${esc(x.codigo) || '—'}</span>`}</td>
+            <td>${editando
+              ? `<input type="text" class="tbl-input" data-asig-nombre="${i}" value="${esc(x.nombre)}" placeholder="Nombre de la asignatura">`
+              : `<span class="asig-view">${esc(x.nombre) || '—'}</span>`}</td>
+            <td class="num asig-acciones">
+              <div class="asig-btns">
+                ${editando
+                  ? `<button type="button" class="icon-btn icon-btn-ok" data-asig-guardar="${i}">${iconGuardar}Guardar</button>`
+                  : `<button type="button" class="icon-btn" data-asig-editar="${i}">${iconEditar}Editar</button>`}
+                <button type="button" class="icon-btn icon-btn-danger" data-asig-eliminar="${i}">${iconEliminar}Eliminar</button>
+              </div>
+            </td>
+          </tr>`;
+          }).join('')}
+          ${a.length === 0 ? `<tr><td colspan="3" class="tbl-empty">No has agregado ninguna asignatura.</td></tr>` : ''}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3">${a.length} asignatura${a.length === 1 ? '' : 's'} matriculada${a.length === 1 ? '' : 's'}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <p class="foot-note">El Decano determinará mediante resolución motivada cuáles asignaturas quedan aprobadas, perdidas o no cursadas.</p>`;
+}
+
+function uploadZoneHTML(key, formatos){
+  return `<div class="upload-zone" data-upload="${key}">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9AA2B1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+    <span><b>Seleccionar archivo</b><br>${formatos} · máx. ${MAX_MB} MB</span>
+  </div>`;
+}
+function fileOkHTML(file, key){
+  return `<div class="file-ok">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1F6B4A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 7"/></svg>
+    <span class="fname">${esc(file.name)}</span>
+    <span style="color:#3E8A68;">${fmtTam(file.size)}</span>
+    <button class="link-btn" data-replace="${key}" style="color:#1F6B4A;">Reemplazar</button>
+  </div>`;
+}
+
+function renderPaso4(){
+  const errs = state.touched[2] ? erroresPaso(2) : [];
+  const err = id => errs.find(x => x.campo === 'doc'+id);
+  return `
+    <h2 class="paso-title">Documentación</h2>
+    <p class="paso-intro">Adjunta los ${DOCUMENTOS.length} documentos de este trámite. Todos son obligatorios, salvo que se indique lo contrario.</p>
+
+    <div class="alert alert-warn">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7A5B1B" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.5l3.5 2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div><b>Vigencia de los documentos</b>Los documentos tienen una vigencia de ${VIGENCIA_DIAS} días calendario desde su expedición. Todos deben estar vigentes al momento de radicar la solicitud.</div>
+    </div>
+
+    ${DOCUMENTOS.map(d => {
+      const st = state.docs[d.id];
+      const e = err(d.id);
+      const v = d.fecha ? vigenciaDe(st.fecha) : null;
+      let vigHTML = '';
+      if(v && v.tipo === 'ok')      vigHTML = `<div class="vig vig-ok"><span class="vig-dot"></span>Vigente · vence el ${v.vencTxt}</div>`;
+      if(v && v.tipo === 'warn')    vigHTML = `<div class="vig vig-warn"><span class="vig-dot"></span>Vence pronto · radica tu solicitud antes del ${v.vencTxt}</div>`;
+      if(v && v.tipo === 'vencido') vigHTML = `<div class="vig vig-bad"><span class="vig-dot"></span>Vencido · expedido hace ${v.dias} días calendario</div>`;
+      if(v && v.tipo === 'futura')  vigHTML = `<div class="vig vig-bad"><span class="vig-dot"></span>La fecha no puede ser posterior a hoy</div>`;
+      const fmtTxt = d.formatos.map(f => f.toUpperCase()).filter((x,i,ar) => ar.indexOf(x) === i).join(', ');
+      return `
+      <div class="doc ${e ? 'has-error':''}" id="docBox${d.id}">
+        <div class="doc-head">
+          <span class="doc-n">${d.id}</span>
+          <div class="doc-titles">
+            <div class="doc-name">${esc(d.nombre)} ${d.requerido === false ? '<span style="color:var(--muted);font-weight:600;">(opcional)</span>' : '<span class="req">*</span>'}</div>
+            <div class="doc-ent">${esc(d.entidad)}</div>
+          </div>
+        </div>
+        <div class="doc-body${d.fecha ? '' : ' doc-body-solo'}">
+          ${d.fecha ? `
+          <div>
+            <div class="fld">
+              <label for="fecha${d.id}">Fecha de expedición <span class="req">*</span></label>
+              <input type="date" id="fecha${d.id}" data-fecha="${d.id}" value="${st.fecha}" max="${new Date().toISOString().slice(0,10)}">
+            </div>
+          </div>` : ''}
+          <div>
+            ${st.file ? fileOkHTML(st.file,'doc'+d.id) : uploadZoneHTML('doc'+d.id, fmtTxt)}
+            <input type="file" id="file${d.id}" accept="${d.formatos.map(f => '.'+f).join(',')}" hidden>
+            ${vigHTML}
+            <div class="err" style="${e ? 'display:block;margin-top:8px;' : ''}">${e ? esc(e.msg) : ''}</div>
+            <div class="err" id="fileErr${d.id}" style="display:none;margin-top:8px;"></div>
+          </div>
+        </div>
+      </div>`;
+    }).join('')}`;
+}
+
+function renderPaso5(){
+  const errs = state.touched[5] ? erroresPaso(5) : [];
+  const errDecl = errs.find(x => x.campo === 'declara');
+  const a = MATRICULA.asignaturas;
+  return `
+    <h2 class="paso-title">Revisión y envío</h2>
+    <p class="paso-intro">Revisa la información antes de radicar. Una vez enviada, la solicitud no podrá modificarse.</p>
+
+    <div id="errorEnvio"></div>
+
+    <div class="rev">
+      <div class="rev-head"><h3>Solicitante</h3><button class="link-btn" data-goto="1">Editar</button></div>
+      <div class="rev-body">
+        <dl class="dl">
+          <dt>Nombre completo</dt><dd>${esc(SESION.nombre)}</dd>
+          <dt>Código estudiantil</dt><dd>${SESION.codigo}</dd>
+          <dt>Programa</dt><dd>${esc(SESION.programa)}</dd>
+          <dt>Periodo de carrera</dt><dd>${SESION.periodoCarrera}°</dd>
+          <dt>Correo institucional</dt><dd>${SESION.correo}</dd>
+          <dt>Periodo académico</dt><dd>${MATRICULA.periodoAcademico}</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="rev">
+      <div class="rev-head"><h3>Motivo de la cancelación</h3><button class="link-btn" data-goto="3">Editar</button></div>
+      <div class="rev-body">
+        <div class="just">${esc(state.descripcion) || 'Sin descripción.'}</div>
+        ${state.soporte ? `<p style="margin:12px 0 0;font-size:12.5px;color:var(--muted);">Soporte adjunto: <b style="color:var(--navy-ink);">${esc(state.soporte.name)}</b></p>` : ''}
+      </div>
+    </div>
+
+    <div class="rev">
+      <div class="rev-head"><h3>Asignaturas del periodo</h3><button class="link-btn" data-goto="4">Ver</button></div>
+      <div class="rev-body">
+        <p style="margin:0 0 10px;font-size:12.8px;color:var(--muted);">La solicitud cubre las ${a.length} asignaturas matriculadas.</p>
+        <ul class="lista-docs">
+          ${a.map(x => `<li><span class="cod">${x.codigo}</span> ${esc(x.nombre)}</li>`).join('')}
+        </ul>
+      </div>
+    </div>
+
+    <div class="rev">
+      <div class="rev-head"><h3>Documentación</h3><button class="link-btn" data-goto="2">Editar</button></div>
+      <div class="rev-body">
+        <ul class="lista-docs">
+          ${DOCUMENTOS.map(d => {
+            const st = state.docs[d.id];
+            const v = d.fecha ? vigenciaDe(st.fecha) : null;
+            return `<li>
+              ${st.file
+                ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2E9E6B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 7"/></svg>`
+                : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8A8F9E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg>`}
+              <span style="flex:1;">${esc(d.nombre)} — ${esc(d.entidad)}</span>
+              <span style="color:var(--muted);">${st.file ? esc(st.file.name) : 'No adjuntado'}${v && v.vencTxt ? ' · exp. ' + fmtFecha(st.fecha) : ''}</span>
+            </li>`;
+          }).join('')}
+        </ul>
+      </div>
+    </div>
+
+    <div class="check ${errDecl ? 'has-error':''}" id="declBox">
+      <input type="checkbox" id="fDecl" ${state.declara ? 'checked':''}>
+      <label for="fDecl">Declaro que la información consignada y los documentos adjuntos son veraces. Entiendo que la inexactitud puede dar lugar al rechazo de la solicitud.</label>
+    </div>
+    ${errDecl ? `<div class="err" style="display:block;margin-top:8px;">${esc(errDecl.msg)}</div>` : ''}
+
+    <div class="alert alert-info" style="margin-top:18px;margin-bottom:0;">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#25407E" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01" stroke-linecap="round"/></svg>
+      <div>
+        <b>Antes de enviar, ten en cuenta</b>
+        De conformidad con los Artículos 53 y 54 del Código Contencioso Administrativo, la respuesta será notificada a tu correo institucional.<br><br>
+        La cancelación de matrícula no anula el registro académico del periodo. El Decano determinará mediante resolución motivada la situación de cada asignatura.
+      </div>
+    </div>`;
+}
+
+/* =========================================================================
+   RENDER GENERAL
+   ========================================================================= */
+function render(){
+  const R = {1:renderPaso1, 2:renderPaso4, 3:renderPaso2, 4:renderPaso3, 5:renderPaso5};
+  $('pasoBody').innerHTML = R[state.paso]();
+  renderStepper();
+
+  $('btnAtrasTxt').textContent = state.paso === 1 ? 'Volver al catálogo' : 'Atrás';
+  $('btnAdelanteTxt').textContent = state.paso === 5 ? 'Enviar solicitud' : 'Continuar';
+  $('btnAdelanteIcon').innerHTML = state.paso === 5
+    ? '<path d="M4 12.5l5.5 5.5L20 7"/>'
+    : '<path d="M5 12h14M13 6l6 6-6 6"/>';
+
+  enlazarPaso();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* =========================================================================
+   ENLACE DE EVENTOS POR PASO
+   ========================================================================= */
+function enlazarPaso(){
+  const desc = $('fDesc');
+  if(desc) desc.addEventListener('input', e => {
+    state.descripcion = e.target.value;
+    const n = state.descripcion.length;
+    const c = $('cCount');
+    c.textContent = `${n} / 1.000 caracteres (mínimo 50)`;
+    c.classList.toggle('bad', n > 0 && n < 50);
+  });
+
+  const fSop = $('fSoporte');
+  if(fSop) fSop.addEventListener('change', e => {
+    const f = e.target.files[0];
+    if(!f) return;
+    const errBox = $('soporteErr');
+    const val = validarArchivo(f, ['pdf','jpg','jpeg','png']);
+    if(val){
+      errBox.textContent = val; errBox.style.display = 'block';
+      e.target.value = ''; return;
+    }
+    errBox.style.display = 'none';
+    state.soporte = {name:f.name, size:f.size};
+    $('soporteSlot').innerHTML = fileOkHTML(state.soporte,'soporte');
+  });
+
+  // Paso 3 — asignaturas: editar código/nombre
+  document.querySelectorAll('[data-asig-codigo]').forEach(inp => {
+    inp.addEventListener('input', e => {
+      MATRICULA.asignaturas[Number(e.target.dataset.asigCodigo)].codigo = e.target.value;
+    });
+  });
+  document.querySelectorAll('[data-asig-nombre]').forEach(inp => {
+    inp.addEventListener('input', e => {
+      MATRICULA.asignaturas[Number(e.target.dataset.asigNombre)].nombre = e.target.value;
+    });
+  });
+
+  // Paso 3 — asignaturas: botón Editar (entra en modo edición de la fila)
+  document.querySelectorAll('[data-asig-editar]').forEach(b => {
+    b.addEventListener('click', e => {
+      state.asigEditando.add(Number(e.currentTarget.dataset.asigEditar));
+      render();
+    });
+  });
+
+  // Paso 3 — asignaturas: botón Guardar (sale del modo edición)
+  document.querySelectorAll('[data-asig-guardar]').forEach(b => {
+    b.addEventListener('click', e => {
+      state.asigEditando.delete(Number(e.currentTarget.dataset.asigGuardar));
+      render();
+    });
+  });
+
+  // Paso 3 — asignaturas: botón Eliminar
+  document.querySelectorAll('[data-asig-eliminar]').forEach(b => {
+    b.addEventListener('click', e => {
+      const i = Number(e.currentTarget.dataset.asigEliminar);
+      const x = MATRICULA.asignaturas[i];
+      const nombre = (x.nombre || x.codigo) ? `"${x.nombre || x.codigo}"` : 'esta asignatura';
+      if(!confirm(`¿Eliminar ${nombre} de la lista de asignaturas?`)) return;
+      MATRICULA.asignaturas.splice(i, 1);
+      const reindexado = new Set();
+      state.asigEditando.forEach(idx => {
+        if(idx === i) return;
+        reindexado.add(idx > i ? idx - 1 : idx);
+      });
+      state.asigEditando = reindexado;
+      render();
+    });
+  });
+
+  // Paso 4 — fechas
+  document.querySelectorAll('[data-fecha]').forEach(inp => {
+    inp.addEventListener('change', e => {
+      state.docs[Number(e.target.dataset.fecha)].fecha = e.target.value;
+      render();
+    });
+  });
+
+  // Paso 4 — archivos
+  DOCUMENTOS.forEach(d => {
+    const inp = $('file'+d.id);
+    if(!inp) return;
+    inp.addEventListener('change', e => {
+      const f = e.target.files[0];
+      if(!f) return;
+      const errBox = $('fileErr'+d.id);
+      const val = validarArchivo(f, d.formatos);
+      if(val){
+        errBox.textContent = val; errBox.style.display = 'block';
+        e.target.value = ''; return;
+      }
+      state.docs[d.id].file = {name:f.name, size:f.size};
+      render();
+    });
+  });
+
+  // Zonas de carga y botones de reemplazo
+  $('pasoBody').querySelectorAll('[data-upload]').forEach(z => {
+    z.addEventListener('click', () => abrirSelector(z.dataset.upload));
+  });
+  $('pasoBody').querySelectorAll('[data-replace]').forEach(b => {
+    b.addEventListener('click', () => abrirSelector(b.dataset.replace));
+  });
+
+  // Paso 5
+  const decl = $('fDecl');
+  if(decl) decl.addEventListener('change', e => {
+    state.declara = e.target.checked;
+    if(state.touched[5]) render();
+  });
+  $('pasoBody').querySelectorAll('[data-goto]').forEach(b => {
+    b.addEventListener('click', () => irAPaso(Number(b.dataset.goto)));
+  });
+}
+
+function abrirSelector(key){
+  if(key === 'soporte'){ $('fSoporte').click(); return; }
+  if(key.startsWith('doc')) $('file' + key.slice(3)).click();
+}
+
+function validarArchivo(f, formatos){
+  const ext = extDe(f.name);
+  const lista = formatos.map(x => x.toUpperCase()).filter((x,i,a) => a.indexOf(x) === i).join(', ');
+  if(!formatos.includes(ext)) return `Formato no admitido. El formato esperado para este anexo es ${lista}.`;
+  if(f.size > MAX_MB * 1024 * 1024) return `El archivo pesa ${fmtTam(f.size)} y supera el máximo permitido de ${MAX_MB} MB.`;
+  return null;
+}
+
+/* =========================================================================
+   NAVEGACIÓN
+   ========================================================================= */
+function irAPaso(n){
+  state.paso = n;
+  state.maxPasoVisto = Math.max(state.maxPasoVisto, n);
+  render();
+}
+
+/* Lleva la vista exactamente al campo con error, no al inicio del paso. */
+function scrollAlPrimerError(n){
+  const err = erroresPaso(n)[0];
+  if(!err) return;
+  let id = null;
+  if(err.campo === 'declara') id = 'declBox';
+  else if(err.campo === 'descripcion') id = 'fDesc';
+  else if(err.campo.startsWith('doc')) id = 'docBox' + err.campo.slice(3);
+  const el = id && $(id);
+  if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function adelante(){
+  if(state.paso === 5){ enviar(); return; }
+  if(!pasoValido(state.paso)){
+    state.touched[state.paso] = true;
+    render();
+    mostrarToast('<b>Faltan datos por diligenciar.</b><br>Revisa los campos resaltados en rojo antes de continuar.', true);
+    return;
+  }
+  state.touched[state.paso] = false;
+  irAPaso(state.paso + 1);
+}
+
+function atras(){
+  if(state.paso === 1){ window.location.href = 'estudiante.html'; return; }
+  irAPaso(state.paso - 1);
+}
+
+/* =========================================================================
+   ENVÍO
+   ========================================================================= */
+function enviar(){
+  // Validación integral: salta al primer paso con errores y baja hasta el campo con problema
+  for(const n of [2,3,5]){
+    if(!pasoValido(n)){
+      state.touched[n] = true;
+      irAPaso(n);
+      scrollAlPrimerError(n);
+      mostrarToast('<b>No se pudo enviar la solicitud.</b><br>Hay campos obligatorios sin diligenciar o documentos vencidos.', true);
+      return;
+    }
+  }
+
+  if(state.enviando) return;
+  state.enviando = true;
+  const btn = $('btnAdelante');
+  btn.disabled = true;
+  $('btnAdelanteTxt').textContent = 'Enviando...';
+  $('btnAdelanteIcon').outerHTML = '<span class="spin" id="btnAdelanteIcon"></span>';
+
+  setTimeout(() => {
+    state.enviando = false;
+    btn.disabled = false;
+
+    registrarSolicitudParaFuncionario();
+    registrarSolicitudParaEstudiante();
+    $('okRad').textContent = RADICADO;
+    $('okFecha').textContent = fmtFechaHora(new Date());
+    $('form').hidden = true;
+    $('done').hidden = false;
+    window.scrollTo({top:0, behavior:'smooth'});
+    mostrarToast('<b>Solicitud radicada.</b><br>Radicado ' + RADICADO + '. Consulta su estado en el módulo de Respuestas.');
+  }, 1100);
+}
+
+/* PRUEBAS: comparte la solicitud radicada con funcionario.html (vía localStorage) para
+   poder mostrar de inmediato cómo se ve en el módulo de Respuestas del Funcionario.
+   No hay backend real: esto es solo para la demostración del mockup. */
+function registrarSolicitudParaFuncionario(){
+  try{
+    const KEY = 'acbb_solicitudes_nuevas';
+    const anexos = DOCUMENTOS.filter(d => state.docs[d.id].file).map(d => state.docs[d.id].file.name);
+    if(state.soporte) anexos.push(state.soporte.name);
+    const registro = {
+      rad: RADICADO,
+      est: SESION.nombre,
+      doc: SESION.documento,
+      prog: SESION.programa,
+      proc: 'Cancelación de Matrícula',
+      fecha: new Date().toISOString(),
+      estado: 'Respondida',
+      decision: 'Aprobada',
+      resolucion: `Resolución ${RADICADO.split('-')[2]}-${RADICADO.split('-')[0]}.pdf`,
+      just: state.descripcion || 'Sin descripción.',
+      anexos: anexos.length ? anexos : ['Solicitud firmada.pdf']
+    };
+    const actuales = JSON.parse(localStorage.getItem(KEY) || '[]').filter(r => r.rad !== registro.rad);
+    actuales.push(registro);
+    localStorage.setItem(KEY, JSON.stringify(actuales));
+  }catch(err){ /* almacenamiento no disponible: no afecta el resto del mockup */ }
+}
+
+/* PRUEBAS: comparte la solicitud radicada con estudiante.html (vía localStorage) para
+   poder mostrar de inmediato cómo se ve en "Mis trámites radicados", en estado En trámite.
+   No hay backend real: esto es solo para la demostración del mockup. */
+function registrarSolicitudParaEstudiante(){
+  try{
+    const KEY = 'acbb_solicitudes_estudiante_nuevas';
+    const anexos = DOCUMENTOS.filter(d => state.docs[d.id].file).map(d => state.docs[d.id].file.name);
+    if(state.soporte) anexos.push(state.soporte.name);
+    const fechaTxt = fmtFecha ? fmtFecha(new Date().toISOString().slice(0,10)) : '';
+    const registro = {
+      rad: RADICADO,
+      proc: 'Cancelación de Matrícula',
+      fecha: new Date().toISOString(),
+      estado: 'En trámite',
+      just: state.descripcion || 'Sin descripción.',
+      anexos: anexos.length ? anexos : ['Solicitud firmada.pdf'],
+      timeline:[
+        {t:'Solicitud radicada', d: fechaTxt, s:'done'},
+        {t:'En trámite (revisión académica)', d:'En curso', s:'current'},
+        {t:'Respuesta al Estudiante', d:'Pendiente', s:'pendiente'}
+      ]
+    };
+    const actuales = JSON.parse(localStorage.getItem(KEY) || '[]').filter(r => r.rad !== registro.rad);
+    actuales.push(registro);
+    localStorage.setItem(KEY, JSON.stringify(actuales));
+  }catch(err){ /* almacenamiento no disponible: no afecta el resto del mockup */ }
+}
+
+/* =========================================================================
+   TOAST
+   ========================================================================= */
+let toastTimer = null;
+function mostrarToast(html, esError){
+  const t = $('toast');
+  $('toastText').innerHTML = html;
+  t.classList.toggle('is-error', !!esError);
+  $('toastIcon').innerHTML = esError
+    ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>'
+    : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 7"/></svg>';
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 5500);
+}
+
+/* =========================================================================
+   EVENTOS GLOBALES
+   ========================================================================= */
+$('btnGate').addEventListener('click', () => {
+  $('gate').hidden = true;
+  $('form').hidden = false;
+  render();
+});
+$('btnAdelante').addEventListener('click', adelante);
+$('btnAtras').addEventListener('click', atras);
+document.querySelectorAll('.step').forEach(b => {
+  b.addEventListener('click', () => {
+    const n = Number(b.dataset.step);
+    if(n <= state.maxPasoVisto) irAPaso(n);
+  });
+});
+
+/* Menú de usuario */
+const userMenuBtn = $('userMenuBtn'), userDropdown = $('userDropdown');
+userMenuBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  const abierto = !userDropdown.hidden;
+  userDropdown.hidden = abierto;
+  userMenuBtn.setAttribute('aria-expanded', String(!abierto));
+});
+document.addEventListener('click', e => {
+  if(!userDropdown.hidden && !e.target.closest('.user-chip')){
+    userDropdown.hidden = true;
+    userMenuBtn.setAttribute('aria-expanded','false');
+  }
+});
+$('btnLogout').addEventListener('click', () => {
+  userDropdown.hidden = true;
+  mostrarToast('<b>Sesión cerrada.</b><br>Has salido de Gestión de Procesos Académicos FIET.');
+});
+
+/* Arranque: se entra directo al formulario. */
+$('form').hidden = false;
+render();
+</script>
+</body>
+</html>
