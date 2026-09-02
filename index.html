@@ -37,12 +37,13 @@
 
   /* ---------- Layout ---------- */
   .app{display:flex;min-height:100vh;}
-  .sidebar{
+  .app > .sidebar{
     width:var(--sidebar-w);flex:0 0 var(--sidebar-w);
     background:var(--navy-900);
     display:flex;flex-direction:column;
+    position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:40;
   }
-  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .app > .main{flex:1;min-width:0;display:flex;flex-direction:column;margin-left:var(--sidebar-w);}
 
   /* ---------- Sidebar ---------- */
   .crest{
@@ -120,6 +121,7 @@
   }
   .card-head h2{margin:0;font-size:15px;font-weight:700;color:var(--navy-ink);}
   .card-body{padding:16px 18px 0;}
+  .acciones-card-body{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;padding-bottom:18px;}
 
   /* ---------- Mi usuario ---------- */
   .user-card{max-width:680px;}
@@ -338,20 +340,71 @@
   .upload-zone b{color:var(--navy-ink);}
   .upload-filename{margin:9px 0 0;font-size:12.5px;color:var(--navy-ink);font-weight:600;}
 
-  /* ---------- Línea de tiempo del trámite ---------- */
-  .timeline{list-style:none;margin:14px 0 0;padding:0;}
-  .timeline li{position:relative;padding:0 0 22px 26px;border-left:2px solid var(--line);}
-  .timeline li:last-child{border-left-color:transparent;padding-bottom:0;}
-  .timeline li::before{
-    content:'';position:absolute;left:-7px;top:0;width:12px;height:12px;
-    border-radius:50%;background:#fff;border:2px solid #C3CAD9;
+  /* ---------- Vista Detalle (página completa) ---------- */
+  .back-btn{
+    display:inline-flex;align-items:center;gap:7px;background:none;border:0;cursor:pointer;
+    color:var(--navy-ink);font-size:13px;font-weight:600;padding:6px 8px;border-radius:4px;
+    margin-bottom:14px;
   }
-  .timeline li.is-done::before{border-color:var(--green);background:var(--green);}
-  .timeline li.is-current::before{border-color:var(--navy-700);background:var(--navy-700);}
-  .timeline li.is-rechazada::before{border-color:var(--red);background:var(--red);}
-  .timeline-title{font-size:13px;font-weight:700;color:var(--navy-ink);}
-  .timeline li:not(.is-done):not(.is-current):not(.is-rechazada) .timeline-title{color:var(--muted);font-weight:600;}
-  .timeline-date{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .back-btn:hover{background:var(--panel);}
+  .back-btn:focus-visible{outline:2px solid #B9C7EE;outline-offset:1px;}
+
+  .page-header{
+    max-width:980px;margin:0 auto 20px;display:flex;justify-content:space-between;
+    align-items:flex-start;gap:20px;flex-wrap:wrap;
+  }
+  .ph-left h1{margin:0 0 6px;font-size:19px;font-weight:700;color:var(--navy-ink);}
+  .ph-meta{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);}
+  .ph-meta b{color:var(--text);font-weight:600;}
+  .acciones-bar{
+    max-width:980px;margin:0 auto 20px;display:flex;justify-content:flex-start;
+    align-items:center;gap:10px;flex-wrap:wrap;
+  }
+
+  .estado-chip-lg{
+    display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:20px;
+    font-size:12.5px;font-weight:700;white-space:nowrap;
+  }
+  .estado-chip-lg.st-tramite{background:#E7EBFB;color:var(--navy-700);}
+  .estado-chip-lg.st-pendiente-pago,.estado-chip-lg.st-verificacion{background:#FDF1E2;color:#8A5A15;}
+  .estado-chip-lg.st-aprobada{background:#E5F5EE;color:var(--green);}
+  .estado-chip-lg.st-rechazada{background:#FBE9E7;color:var(--red);}
+
+  .layout-detalle .card-body{padding-bottom:18px;}
+  .layout-detalle{max-width:980px;margin:0 auto;}
+  .layout-detalle .card{margin:0 0 18px;max-width:none;}
+
+  .field-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px 20px;}
+  .field-grid .field .value{font-size:13.5px;color:var(--text);font-weight:600;}
+  .card-head .count{
+    margin-left:auto;font-size:12px;font-weight:600;color:var(--muted);
+    background:var(--panel);padding:3px 9px;border-radius:10px;
+  }
+
+  .mini-table{width:100%;max-width:100%;min-width:0;table-layout:fixed;border-collapse:collapse;font-size:12.8px;border:1px solid var(--line);}
+  .mini-table th,.mini-table td{border:1px solid var(--line);}
+  .mini-table th{
+    text-align:center;vertical-align:middle;padding:7px 6px;background:var(--panel);color:var(--muted);
+    font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;
+    overflow-wrap:anywhere;white-space:normal;
+  }
+  .mini-table td{padding:8px;overflow-wrap:anywhere;vertical-align:middle;text-align:center;}
+  .mini-table th.txt-left,.mini-table td.txt-left{text-align:left;}
+  .mini-table .muted{color:var(--muted);}
+
+  .resolucion-note{
+    background:#FFF8E9;border:1px solid #F0DEB4;border-radius:5px;
+    padding:13px 14px;font-size:12.5px;line-height:1.6;color:#6B551F;
+  }
+  .comprobante-destacado{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    background:var(--panel);border-radius:5px;padding:12px 14px;
+  }
+  .comprobante-destacado small{display:block;color:var(--muted);font-weight:400;}
+
+  @media (max-width:880px){
+    .field-grid{grid-template-columns:1fr;}
+  }
 
   /* ---------- Toast de confirmación ---------- */
   .toast{
@@ -649,42 +702,75 @@
           <div class="pager" id="pager"></div>
         </div>
       </section>
+
+      <!-- ---------- VISTA: DETALLE DE SOLICITUD (página completa) ---------- -->
+      <section id="view-detalle" hidden>
+        <button class="back-btn" id="dVolver" type="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Volver
+        </button>
+
+        <div class="page-header">
+          <div class="ph-left">
+            <h1 id="dTitulo">Solicitud</h1>
+            <div class="ph-meta" id="dMeta"></div>
+          </div>
+        </div>
+
+        <div class="acciones-bar" id="dAcciones"></div>
+
+        <div class="layout-detalle" id="dLayout">
+
+          <div class="card">
+            <div class="card-head"><h2>Datos generales</h2></div>
+            <div class="card-body">
+              <div class="field-grid" id="dGeneral"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h2>Justificación de la solicitud</h2></div>
+            <div class="card-body">
+              <div class="just" id="dJust"></div>
+            </div>
+          </div>
+
+          <div class="card" id="dProcesoCard" hidden>
+            <div class="card-head"><h2 id="dProcesoTitulo">Datos del proceso</h2></div>
+            <div class="card-body" id="dProcesoExtra"></div>
+          </div>
+
+          <div class="card" id="dPazCard" hidden>
+            <div class="card-head"><h2>Documentación anexada</h2></div>
+            <div class="card-body" id="dPazSalvos"></div>
+          </div>
+
+          <div class="card" id="dAnexosCard">
+            <div class="card-head"><h2>Anexos adjuntos</h2><span class="count" id="dAnexosCount"></span></div>
+            <div class="card-body">
+              <ul class="anexos" id="dAnexos"></ul>
+            </div>
+          </div>
+
+          <div class="card" id="dComprobanteCard" hidden>
+            <div class="card-head"><h2>Comprobante de pago</h2></div>
+            <div class="card-body" id="dComprobante"></div>
+          </div>
+
+          <div id="dResultado"></div>
+
+          <div class="card acciones-card" id="dAccionesCard" hidden>
+            <div class="card-body acciones-card-body" id="dAccionesFinales"></div>
+          </div>
+
+        </div>
+      </section>
     </div>
 
     <footer>
       2026 &nbsp;|&nbsp; Gestión de Procesos Académicos FIET &nbsp;|&nbsp; Facultad de Ingeniería Electrónica y Telecomunicaciones<br>
       División de Tecnologías de la Información y las Comunicaciones &nbsp;|&nbsp; Versión 1.0.0
     </footer>
-  </div>
-</div>
-
-<!-- ===================== MODAL SEGUIMIENTO ===================== -->
-<div class="backdrop" id="backdrop" role="dialog" aria-modal="true" aria-labelledby="mTitle">
-  <div class="modal">
-    <div class="modal-head">
-      <h3 id="mTitle">Seguimiento del trámite</h3>
-      <button class="modal-close" id="mClose" aria-label="Cerrar">&times;</button>
-    </div>
-    <div class="modal-body">
-      <dl class="dl dl-compact">
-        <dt>Número de radicado</dt><dd id="mRad"></dd>
-        <dt>Tipo de proceso académico</dt><dd id="mProc"></dd>
-        <dt>Fecha de radicación</dt><dd id="mFec"></dd>
-        <dt>Estado actual</dt><dd id="mEstado"></dd>
-      </dl>
-
-      <div class="modal-sub">Justificación de la solicitud</div>
-      <div class="just" id="mJust"></div>
-
-      <div class="modal-sub">Anexos adjuntos</div>
-      <ul class="anexos" id="mAnexos"></ul>
-
-      <div class="modal-sub">Línea de tiempo</div>
-      <ul class="timeline" id="mTimeline"></ul>
-
-      <div id="mExtra"></div>
-    </div>
-    <div class="modal-foot" id="mFoot"></div>
   </div>
 </div>
 
@@ -746,6 +832,8 @@ const DATA = [
     rad:'2026-ES-0146', proc:PROC.ES, fecha:'2026-07-29T10:00', estado:'Pendiente de pago', decision:'Aprobada',
     just:'Solicito examen supletorio de Comunicaciones Digitales por incapacidad médica el día de la evaluación.',
     anexos:['Solicitud firmada.pdf','Incapacidad médica.pdf','Visto bueno del docente.pdf'],
+    telefono:'3128894521', examen:'Comunicaciones Digitales', codExamen:'8507230-M', grupo:'C',
+    fechaExamen:'2026-07-16', propuesta:'2026-08-08', firmaDocente:'Firma docente - Ing. Estrada.pdf', causa:'otra',
     timeline:[
       {t:'Solicitud radicada', d:'29/07/2026', s:'done'},
       {t:'En trámite (Decano y Funcionario)', d:'02/08/2026', s:'done'},
@@ -757,6 +845,8 @@ const DATA = [
     rad:'2026-ES-0143', proc:PROC.ES, fecha:'2026-07-25T11:40', estado:'En verificación de pago', decision:'Aprobada', comprobante:'Comprobante de pago.pdf',
     just:'Solicito examen supletorio de Bases de Datos por calamidad doméstica el día de la evaluación.',
     anexos:['Solicitud firmada.pdf','Certificado de defunción.pdf','Visto bueno del docente.pdf'],
+    telefono:'3128894521', examen:'Bases de Datos', codExamen:'8506110-M', grupo:'B',
+    fechaExamen:'2026-07-11', propuesta:'2026-08-04', firmaDocente:'Firma docente - Ing. Salazar.pdf', causa:'otra',
     timeline:[
       {t:'Solicitud radicada', d:'25/07/2026', s:'done'},
       {t:'En trámite (Decano y Funcionario)', d:'28/07/2026', s:'done'},
@@ -765,9 +855,10 @@ const DATA = [
     ]
   },
   {
-    rad:'2026-CA-0150', proc:PROC.CA, fecha:'2026-07-30T14:20', estado:'Aprobada', decision:'Aprobada', resolucion:'Resolución 0150-2026.pdf',
+    rad:'2026-CA-0150', proc:PROC.CA, fecha:'2026-07-30T14:20', estado:'Aprobada', decision:'Aprobada',
     just:'Solicito la cancelación de la asignatura Redes de Computadores por incompatibilidad de horario con la práctica empresarial.',
     anexos:['Solicitud firmada.pdf','Carta de coordinación.pdf'],
+    asignaturas:[{cod:'8511112-M', nombre:'Redes de Computadores', faltas:6, nota:'2.8', sitMatricula:'R0', sitCancelar:'R0'}],
     timeline:[
       {t:'Solicitud radicada', d:'30/07/2026', s:'done'},
       {t:'En trámite (Decano y Funcionario)', d:'02/08/2026', s:'done'},
@@ -778,6 +869,15 @@ const DATA = [
     rad:'2026-CM-0140', proc:PROC.CM, fecha:'2026-07-20T09:00', estado:'Rechazada', decision:'Rechazada', observacion:'La certificación laboral presentada no acredita el traslado fuera de la ciudad durante el periodo académico vigente.',
     just:'Solicito la cancelación de matrícula por traslado laboral fuera de la ciudad de Popayán.',
     anexos:['Solicitud firmada.pdf','Carta laboral.pdf','Historia académica.pdf'],
+    asignaturas:[
+      {cod:'8506201-M', nombre:'Ingeniería de Software I', faltas:4, nota:'3.2', sitMatricula:'R0', sitCancelar:'R0'},
+      {cod:'8506205-M', nombre:'Redes de Computadores', faltas:2, nota:'3.5', sitMatricula:'R0', sitCancelar:'R0'},
+      {cod:'8506210-M', nombre:'Sistemas Operativos', faltas:5, nota:'2.6', sitMatricula:'R1', sitCancelar:'R1'}
+    ],
+    pazYSalvos:[
+      {entidad:'Biblioteca', archivo:'Paz y salvo Biblioteca.pdf', fecha:'2026-07-15'},
+      {entidad:'División Financiera', archivo:'Paz y salvo Financiero.pdf', fecha:'2026-07-16'}
+    ],
     timeline:[
       {t:'Solicitud radicada', d:'20/07/2026', s:'done'},
       {t:'En trámite (Decano y Funcionario)', d:'24/07/2026', s:'done'},
@@ -878,7 +978,7 @@ function render(){
       <td><span class="estado">${iconEstado(r.estado)}${r.estado}</span></td>
       <td>
         <div class="acciones-multi">
-          <button class="btn-eye" data-rad="${r.rad}" title="Ver seguimiento" aria-label="Ver seguimiento de ${r.rad}">
+          <button class="btn-eye" data-rad="${r.rad}" title="Ver detalle" aria-label="Ver detalle de ${r.rad}">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#2F6FD0" stroke-width="1.7">
               <path d="M2 12s3.8-6.5 10-6.5S22 12 22 12s-3.8 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.7"/>
             </svg>
@@ -907,22 +1007,14 @@ function renderPager(total){
   pager.innerHTML = `<div class="pager-box">${btns}</div>`;
 }
 
-/* ---------- Modal seguimiento ---------- */
-const backdrop = document.getElementById('backdrop');
-let lastFocus = null;
-
-function abrirSeguimiento(rad){
-  const r = DATA.find(x => x.rad === rad);
-  if(!r) return;
-  lastFocus = document.activeElement;
-
-  document.getElementById('mRad').textContent = r.rad;
-  document.getElementById('mProc').textContent = r.proc;
-  document.getElementById('mFec').textContent = fmtFecha(r.fecha);
-  document.getElementById('mEstado').innerHTML = `<span class="estado">${iconEstado(r.estado)}${r.estado}</span>`;
-  document.getElementById('mJust').textContent = r.just;
-
-  document.getElementById('mAnexos').innerHTML = r.anexos.map(a => `
+/* ---------- Documentos / anexos ---------- */
+function fmtFechaSolo(iso){
+  if(!iso) return '';
+  const [y,m,dd] = iso.split('-');
+  return `${dd}/${m}/${y}`;
+}
+function anexosHTML(lista){
+  return (lista || []).map(a => `
     <li>
       <span class="anexo-name">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D0463B" stroke-width="1.6"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z"/><path d="M14 3v5h5"/></svg>
@@ -933,54 +1025,215 @@ function abrirSeguimiento(rad){
         <button class="link-btn" type="button">Descargar</button>
       </span>
     </li>`).join('');
-
-  document.getElementById('mTimeline').innerHTML = r.timeline.map(p => `
-    <li class="is-${p.s}">
-      <div class="timeline-title">${p.t}</div>
-      <div class="timeline-date">${p.d}</div>
-    </li>`).join('');
-
-  let extra = '';
-  if(r.estado === 'Aprobada' && r.resolucion){
-    extra = `
-      <div class="modal-sub">Resolución</div>
-      <ul class="anexos">
-        <li>
-          <span class="anexo-name">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D0463B" stroke-width="1.6"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z"/><path d="M14 3v5h5"/></svg>
-            <span>${r.resolucion}</span>
-          </span>
-          <span class="anexo-actions">
-            <button class="link-btn" type="button">Visualizar</button>
-            <button class="link-btn" type="button" data-descargar-resolucion>Descargar</button>
-          </span>
-        </li>
-      </ul>`;
-  } else if(r.estado === 'Rechazada'){
-    extra = `
-      <div class="modal-sub">Motivo del rechazo</div>
-      <div class="just">${r.observacion || 'No se registró una observación.'}</div>`;
-  } else if(r.estado === 'Pendiente de pago'){
-    extra = `<p class="note">Tu solicitud fue aprobada. Debes cargar el comprobante de pago del derecho pecuniario para continuar con el trámite.</p>`;
-  } else if(r.estado === 'En verificación de pago'){
-    extra = `<p class="note">Cargaste el comprobante de pago (${r.comprobante}). El Funcionario Académico lo está verificando para cerrar el trámite.</p>`;
-  }
-  document.getElementById('mExtra').innerHTML = extra;
-
-  const pieBtns = [`<button class="btn btn-ghost" data-close>Cerrar</button>`];
-  if(r.estado === 'Pendiente de pago'){
-    pieBtns.push(`<button class="btn btn-primary" data-accion="pago" data-rad="${r.rad}">Cargar comprobante de pago</button>`);
-  }
-  document.getElementById('mFoot').innerHTML = pieBtns.join('');
-
-  backdrop.classList.add('open');
-  document.body.style.overflow = 'hidden';
-  document.getElementById('mClose').focus();
 }
-function cerrarDetalle(){
-  backdrop.classList.remove('open');
-  document.body.style.overflow = '';
-  if(lastFocus) lastFocus.focus();
+function documentosHTML(lista){
+  return (lista || []).map(p => `
+    <li>
+      <span class="anexo-name">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D0463B" stroke-width="1.6"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z"/><path d="M14 3v5h5"/></svg>
+        <span><strong>${p.entidad}:</strong> ${p.archivo}</span>
+      </span>
+      <span class="anexo-actions">
+        <button class="link-btn" type="button">Visualizar</button>
+        <button class="link-btn" type="button">Descargar</button>
+      </span>
+    </li>`).join('');
+}
+
+/* ---------- Situación académica (diligenciada por el Funcionario Académico) ---------- */
+const OPCIONES_SITUACION = [
+  {v:'R0', t:'R0 — Cursa por primera vez'},
+  {v:'R1', t:'R1 — Repite por primera vez'},
+  {v:'R2', t:'R2 — Repite por segunda vez'},
+  {v:'R3', t:'R3 — Repite por tercera vez'}
+];
+function textoSituacion(v){
+  const o = OPCIONES_SITUACION.find(o => o.v === v);
+  return o ? o.t : '—';
+}
+function renderTablaAsignaturas(r){
+  const filas = (r.asignaturas || []).map(a => `
+    <tr>
+      <td class="txt-left">${a.cod}</td>
+      <td class="txt-left">${a.nombre}</td>
+      <td>${(a.faltas != null && a.faltas !== '') ? a.faltas : '—'}</td>
+      <td>${(a.nota != null && a.nota !== '') ? a.nota : '—'}</td>
+      <td>${textoSituacion(a.sitMatricula)}</td>
+      <td>${textoSituacion(a.sitCancelar)}</td>
+    </tr>`).join('');
+
+  return `
+    <table class="mini-table">
+      <colgroup>
+        <col style="width:12%"><col style="width:26%"><col style="width:10%">
+        <col style="width:10%"><col style="width:21%"><col style="width:21%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th rowspan="3">Código</th>
+          <th rowspan="3">Asignatura</th>
+          <th colspan="4">Espacio diligenciado por el Funcionario Académico</th>
+        </tr>
+        <tr>
+          <th rowspan="2">No. Faltas</th>
+          <th rowspan="2">Nota</th>
+          <th colspan="2">Situación Académica de la(s) Asignatura(s)</th>
+        </tr>
+        <tr>
+          <th>En la Matrícula</th>
+          <th>Al Cancelar</th>
+        </tr>
+      </thead>
+      <tbody>${filas}</tbody>
+    </table>`;
+}
+
+/* ---------- Detalle de solicitud (página completa) ---------- */
+function estadoChipClass(estado){
+  const map = {
+    'En trámite':'st-tramite',
+    'Pendiente de pago':'st-pendiente-pago',
+    'En verificación de pago':'st-verificacion',
+    'Aprobada':'st-aprobada',
+    'Rechazada':'st-rechazada'
+  };
+  return map[estado] || '';
+}
+function renderProcesoExtra(r){
+  if(r.proc === PROC.ES){
+    let html = `
+      <div class="field-grid">
+        <div class="field"><label>Asignatura</label><div class="value">${r.examen || '—'}</div></div>
+        <div class="field"><label>Código de la asignatura</label><div class="value">${r.codExamen || '—'}</div></div>
+        <div class="field"><label>Grupo</label><div class="value">${r.grupo || '—'}</div></div>
+        <div class="field"><label>Fecha del examen no presentado</label><div class="value">${fmtFechaSolo(r.fechaExamen) || '—'}</div></div>
+        <div class="field"><label>Fecha propuesta del supletorio</label><div class="value">${fmtFechaSolo(r.propuesta) || '—'}</div></div>
+        <div class="field"><label>Teléfono de contacto</label><div class="value">${r.telefono || '—'}</div></div>
+      </div>`;
+    if(r.causa === 'cruce' && r.cruce){
+      html += `
+        <div class="modal-sub">Cruce con otra evaluación</div>
+        <div class="field-grid">
+          <div class="field"><label>Asignatura en cruce</label><div class="value">${r.cruce.asignatura || '—'}</div></div>
+          <div class="field"><label>Código</label><div class="value">${r.cruce.codigo || '—'}</div></div>
+          <div class="field"><label>Fecha</label><div class="value">${fmtFechaSolo(r.cruce.fecha) || '—'}</div></div>
+          <div class="field"><label>Hora</label><div class="value">${r.cruce.hora || '—'}</div></div>
+        </div>`;
+    }
+    return html;
+  }
+  return renderTablaAsignaturas(r);
+}
+
+function abrirDetallePagina(rad){
+  const r = DATA.find(x => x.rad === rad);
+  if(!r) return;
+
+  document.getElementById('dTitulo').textContent = 'Solicitud de ' + r.proc;
+  document.getElementById('dMeta').innerHTML = `
+    <span>Radicado <b>${r.rad}</b></span>
+    <span>${r.proc}</span>
+    <span>Radicada el ${fmtFecha(r.fecha)}</span>`;
+
+  document.getElementById('dAcciones').innerHTML =
+    `<span class="estado-chip-lg ${estadoChipClass(r.estado)}">${iconEstado(r.estado)}${r.estado}</span>`;
+
+  document.getElementById('dGeneral').innerHTML = `
+    <div class="field"><label>Número de radicado</label><div class="value">${r.rad}</div></div>
+    <div class="field"><label>Tipo de proceso</label><div class="value">${r.proc}</div></div>
+    <div class="field"><label>Fecha de radicación</label><div class="value">${fmtFecha(r.fecha)}</div></div>`;
+
+  document.getElementById('dJust').textContent = r.just;
+
+  const esCM = r.proc === PROC.CM;
+  document.getElementById('dProcesoTitulo').textContent =
+    esCM ? 'Asignaturas matriculadas' : (r.proc === PROC.CA ? 'Asignaturas a cancelar' : 'Datos del proceso');
+  document.getElementById('dProcesoCard').hidden = false;
+  document.getElementById('dProcesoExtra').innerHTML = renderProcesoExtra(r);
+
+  const dPazCard = document.getElementById('dPazCard');
+  if(esCM){
+    dPazCard.hidden = false;
+    document.getElementById('dPazSalvos').innerHTML = `<ul class="anexos">${documentosHTML(r.pazYSalvos)}</ul>`;
+  } else {
+    dPazCard.hidden = true;
+  }
+
+  document.getElementById('dAnexosCount').textContent = (r.anexos || []).length;
+  document.getElementById('dAnexos').innerHTML = anexosHTML(r.anexos);
+
+  const comprobanteCard = document.getElementById('dComprobanteCard');
+  if(r.comprobante){
+    comprobanteCard.hidden = false;
+    document.getElementById('dComprobante').innerHTML = `
+      <div class="comprobante-destacado">
+        <span class="anexo-name">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2E9E6B" stroke-width="1.6"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z"/><path d="M14 3v5h5"/></svg>
+          <span>${r.comprobante}<small>Cargado por ti</small></span>
+        </span>
+        <span class="anexo-actions">
+          <button class="link-btn" type="button">Visualizar</button>
+          <button class="link-btn" type="button">Descargar</button>
+        </span>
+      </div>`;
+  } else {
+    comprobanteCard.hidden = true;
+    document.getElementById('dComprobante').innerHTML = '';
+  }
+
+  /* ---- Resultado: decisión / resolución / motivo de rechazo / pago (a lo ancho, debajo de los anexos) ---- */
+  let resultadoHTML = '';
+  if(r.estado === 'Aprobada'){
+    const esES = r.proc === PROC.ES;
+    const notaResolucion = esES
+      ? 'Este proceso no genera Resolución. La decisión ya fue comunicada directamente a ti a través de este sistema.'
+      : 'Tu solicitud fue aprobada. Por reglamento de la Universidad del Cauca no se admiten firmas digitales: la Resolución se firma únicamente de forma física. Acércate a la Decanatura de la FIET dentro de los cinco (5) días siguientes a la firma de la Resolución para conocer el resultado formal de tu trámite.';
+    resultadoHTML = `
+      <div class="card">
+        <div class="card-head"><h2>Resolución</h2></div>
+        <div class="card-body"><div class="resolucion-note">${notaResolucion}</div></div>
+      </div>`;
+  } else if(r.estado === 'Rechazada'){
+    resultadoHTML = `
+      <div class="card">
+        <div class="card-head"><h2>Motivo del rechazo</h2></div>
+        <div class="card-body"><div class="just">${r.observacion || 'No se registró una observación.'}</div></div>
+      </div>`;
+  } else if(r.estado === 'Pendiente de pago'){
+    resultadoHTML = `
+      <div class="card">
+        <div class="card-head"><h2>Pago pendiente</h2></div>
+        <div class="card-body"><p class="note">Tu solicitud fue aprobada. Debes cargar el comprobante de pago del derecho pecuniario para continuar con el trámite.</p></div>
+      </div>`;
+  } else if(r.estado === 'En verificación de pago'){
+    resultadoHTML = `
+      <div class="card">
+        <div class="card-head"><h2>Verificación de pago</h2></div>
+        <div class="card-body"><p class="note">Cargaste el comprobante de pago (${r.comprobante}). El Funcionario Académico lo está verificando para cerrar el trámite.</p></div>
+      </div>`;
+  }
+  document.getElementById('dResultado').innerHTML = resultadoHTML;
+
+  const accionesFinales = (r.estado === 'Pendiente de pago')
+    ? `<button class="btn btn-primary" data-accion="pago" data-rad="${r.rad}">Cargar comprobante de pago</button>`
+    : '';
+  document.getElementById('dAccionesCard').hidden = !accionesFinales;
+  document.getElementById('dAccionesFinales').innerHTML = accionesFinales;
+
+  irADetalle();
+}
+
+function irADetalle(){
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('is-active'));
+  Object.keys(VIEWS).forEach(k => document.getElementById('view-'+k).hidden = true);
+  document.getElementById('view-detalle').hidden = false;
+  document.getElementById('crumbView').textContent = 'Respuestas';
+  document.getElementById('sectionTab').textContent = 'Detalle de la solicitud';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function volverDeDetalle(){
+  document.getElementById('view-detalle').hidden = true;
+  irA('respuestas');
 }
 
 /* ---------- Modal cargar comprobante de pago ---------- */
@@ -1036,6 +1289,7 @@ function confirmarComprobante(){
   ];
   cerrarCargarComprobante();
   render();
+  if(!document.getElementById('view-detalle').hidden) abrirDetallePagina(r.rad);
   mostrarToast('<b>Comprobante enviado.</b><br>Tu trámite pasó a verificación por parte del Funcionario Académico.');
 }
 
@@ -1054,6 +1308,7 @@ const VIEWS = {usuario:'Mi usuario', solicitudes:'Solicitudes', respuestas:'Resp
 function irA(v){
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('is-active', b.dataset.view === v));
   Object.keys(VIEWS).forEach(k => document.getElementById('view-'+k).hidden = (k !== v));
+  document.getElementById('view-detalle').hidden = true;
   document.getElementById('crumbView').textContent = VIEWS[v];
   document.getElementById('sectionTab').textContent = VIEWS[v];
   window.scrollTo(0, 0);
@@ -1079,25 +1334,17 @@ document.querySelectorAll('th.sortable').forEach(th => th.addEventListener('clic
 
 document.getElementById('tbody').addEventListener('click', e => {
   const b = e.target.closest('.btn-eye');
-  if(b) abrirSeguimiento(b.dataset.rad);
+  if(b) abrirDetallePagina(b.dataset.rad);
 });
 document.getElementById('pager').addEventListener('click', e => {
   const b = e.target.closest('button[data-go]');
   if(b && !b.disabled){ page = Number(b.dataset.go); render(); window.scrollTo({top:0,behavior:'smooth'}); }
 });
 
-document.getElementById('mClose').addEventListener('click', cerrarDetalle);
-backdrop.addEventListener('click', e => {
-  if(e.target === backdrop || e.target.hasAttribute('data-close')) cerrarDetalle();
-});
-document.getElementById('mFoot').addEventListener('click', e => {
+document.getElementById('dVolver').addEventListener('click', volverDeDetalle);
+document.getElementById('dAccionesFinales').addEventListener('click', e => {
   const bPago = e.target.closest('[data-accion="pago"]');
-  if(bPago){ cerrarDetalle(); abrirCargarComprobante(bPago.dataset.rad); }
-});
-document.getElementById('mExtra').addEventListener('click', e => {
-  if(e.target.closest('[data-descargar-resolucion]')){
-    mostrarToast('<b>Descarga simulada.</b><br>En la versión final, la resolución se descargará en formato PDF.');
-  }
+  if(bPago) abrirCargarComprobante(bPago.dataset.rad);
 });
 
 document.getElementById('cClose').addEventListener('click', cerrarCargarComprobante);
@@ -1109,7 +1356,6 @@ backdropComprobante.addEventListener('click', e => {
 
 document.addEventListener('keydown', e => {
   if(e.key === 'Escape'){
-    if(backdrop.classList.contains('open')) cerrarDetalle();
     if(backdropComprobante.classList.contains('open')) cerrarCargarComprobante();
     if(!userDropdown.hidden){ cerrarMenuUsuario(); userMenuBtn.focus(); }
   }
