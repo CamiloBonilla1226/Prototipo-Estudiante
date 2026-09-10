@@ -1393,7 +1393,21 @@ document.getElementById('btnLogout').addEventListener('click', () => {
 });
 
 render();
-irA(VIEWS[location.hash.slice(1)] ? location.hash.slice(1) : 'usuario');
+/* Al recargar la página (F5) siempre debe ir a "Mi usuario", sin importar el hash
+   que haya quedado en la URL. El hash solo se respeta cuando se llega aquí por una
+   navegación real (p. ej. "Volver al catálogo" desde un formulario), no en una recarga. */
+(function irAVistaInicial(){
+  const entradaNav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+  const esRecarga = entradaNav
+    ? entradaNav.type === 'reload'
+    : !!(performance.navigation && performance.navigation.type === 1);
+  if(esRecarga){
+    if(location.hash) history.replaceState(null, '', location.pathname + location.search);
+    irA('usuario');
+  } else {
+    irA(VIEWS[location.hash.slice(1)] ? location.hash.slice(1) : 'usuario');
+  }
+})();
 
 /* =========================================================================
    PLANTILLAS DESCARGABLES — anexos de Examen Supletorio
