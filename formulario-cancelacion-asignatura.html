@@ -34,8 +34,12 @@
 
   /* ---------- Layout ---------- */
   .app{display:flex;min-height:100vh;}
-  .sidebar{width:var(--sidebar-w);flex:0 0 var(--sidebar-w);background:var(--navy-900);display:flex;flex-direction:column;}
-  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .app > .sidebar{
+    width:var(--sidebar-w);flex:0 0 var(--sidebar-w);background:var(--navy-900);
+    display:flex;flex-direction:column;
+    position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:40;
+  }
+  .app > .main{flex:1;min-width:0;display:flex;flex-direction:column;margin-left:var(--sidebar-w);}
 
   /* ---------- Sidebar ---------- */
   .crest{height:112px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(255,255,255,.10);}
