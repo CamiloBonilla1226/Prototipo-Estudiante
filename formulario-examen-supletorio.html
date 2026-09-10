@@ -266,15 +266,15 @@
       <div class="crest-fallback">UNIVERSIDAD<br>DEL CAUCA</div>
     </div>
     <nav class="nav" aria-label="Navegación principal">
-      <a class="nav-item" href="estudiante.html" title="Mi usuario" aria-label="Mi usuario">
+      <a class="nav-item" href="index.html" title="Mi usuario" aria-label="Mi usuario">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3"/><path d="M6.5 19a6 6 0 0 1 11 0"/></svg>
         <span class="bar" aria-hidden="true">|</span><span class="label">Mi usuario</span>
       </a>
-      <a class="nav-item is-active" href="estudiante.html" title="Solicitudes" aria-label="Solicitudes" aria-current="page">
+      <a class="nav-item is-active" href="index.html#solicitudes" title="Solicitudes" aria-label="Solicitudes" aria-current="page">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
         <span class="bar" aria-hidden="true">|</span><span class="label">Solicitudes</span>
       </a>
-      <a class="nav-item" href="estudiante.html#respuestas" title="Respuestas" aria-label="Respuestas">
+      <a class="nav-item" href="index.html#respuestas" title="Respuestas" aria-label="Respuestas">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4 4l16 8-16 8 3-8-3-8z"/></svg>
         <span class="bar" aria-hidden="true">|</span><span class="label">Respuestas</span>
       </a>
@@ -306,7 +306,7 @@
 
     <div class="content">
       <div class="crumbs">
-        <b>Estudiante</b><span>&gt;</span><a href="estudiante.html">Solicitudes</a><span>&gt;</span><b>Examen Supletorio</b>
+        <b>Estudiante</b><span>&gt;</span><a href="index.html#solicitudes">Solicitudes</a><span>&gt;</span><b>Examen Supletorio</b>
       </div>
       <div class="section-tab">Examen Supletorio</div>
 
@@ -354,7 +354,7 @@
             </div>
           </div>
           <div class="acciones">
-            <a class="btn btn-ghost" href="estudiante.html">
+            <a class="btn btn-ghost" href="index.html#solicitudes">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1F2A6D" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
               Volver al catálogo
             </a>
@@ -412,7 +412,7 @@
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#25407E" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01" stroke-linecap="round"/></svg>
               <div><b>Qué sigue</b>Si el Decano aprueba tu solicitud, en el módulo de Respuestas encontrarás el recibo de pago de los derechos del examen. Deberás pagarlo y subir el comprobante desde la aplicación: el examen no queda autorizado hasta que el Funcionario Académico verifique ese comprobante.</div>
             </div>
-            <a class="btn btn-primary" href="estudiante.html#respuestas" style="justify-content:center;">
+            <a class="btn btn-primary" href="index.html#respuestas" style="justify-content:center;">
               Ir a mis trámites radicados
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </a>
@@ -572,7 +572,7 @@ function renderGate(){
   if(state.escenario === 'duplicada'){
     bloqueos.push({
       titulo:'Ya tienes una solicitud de supletorio en curso',
-      texto:`Existe una solicitud de Examen Supletorio con radicado <b>${RADICADO_EN_CURSO}</b> que aún está en trámite. Debes esperar la respuesta antes de radicar una nueva. <a href="estudiante.html#respuestas" style="color:#8A2C22;font-weight:700;">Ver la solicitud existente</a>.`
+      texto:`Existe una solicitud de Examen Supletorio con radicado <b>${RADICADO_EN_CURSO}</b> que aún está en trámite. Debes esperar la respuesta antes de radicar una nueva. <a href="index.html#respuestas" style="color:#8A2C22;font-weight:700;">Ver la solicitud existente</a>.`
     });
   }
 
@@ -1191,13 +1191,13 @@ function hayDatos(){
 }
 
 function salirDelFormulario(){
-  if(!hayDatos()){ window.location.href = 'estudiante.html'; return; }
+  if(!hayDatos()){ window.location.href = 'index.html#solicitudes'; return; }
   abrirModal({
     titulo:'¿Salir sin radicar la solicitud?',
     texto:'La información que has diligenciado no se guarda. Si sales ahora, tendrás que empezar de nuevo.',
     confirmar:'Salir sin guardar',
     peligro:true,
-    onConfirmar:() => { window.location.href = 'estudiante.html'; }
+    onConfirmar:() => { window.location.href = 'index.html#solicitudes'; }
   });
 }
 
@@ -1302,7 +1302,7 @@ function registrarSolicitudParaFuncionario(){
   }catch(err){ /* almacenamiento no disponible: no afecta el resto del mockup */ }
 }
 
-/* PRUEBAS: comparte la solicitud radicada con estudiante.html (vía localStorage).
+/* PRUEBAS: comparte la solicitud radicada con index.html (vía localStorage).
    El estudiante la ve "En Gestión" porque el turno es del Funcionario. */
 function registrarSolicitudParaEstudiante(){
   try{
