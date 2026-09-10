@@ -830,6 +830,7 @@ const PROC = {
 const DATA = [
   {
     rad:'2026-ES-0146', proc:PROC.ES, fecha:'2026-07-29T10:00', estado:'Pendiente de pago', decision:'Aprobada',
+    recibo:'Recibo de pago - Derechos Examen Supletorio.pdf',
     just:'Solicito examen supletorio de Comunicaciones Digitales por incapacidad médica el día de la evaluación.',
     anexos:['Solicitud firmada.pdf','Incapacidad médica.pdf','Visto bueno del docente.pdf'],
     telefono:'3128894521', examen:'Comunicaciones Digitales', codExamen:'8507230-M', grupo:'C',
@@ -1200,10 +1201,16 @@ function abrirDetallePagina(rad){
         <div class="card-body"><div class="just">${r.observacion || 'No se registró una observación.'}</div></div>
       </div>`;
   } else if(r.estado === 'Pendiente de pago'){
+    const reciboHTML = r.recibo ? `
+      <div class="modal-sub">Recibo de pago</div>
+      <ul class="anexos">${anexosHTML([r.recibo])}</ul>` : '';
     resultadoHTML = `
       <div class="card">
         <div class="card-head"><h2>Pago pendiente</h2></div>
-        <div class="card-body"><p class="note">Tu solicitud fue aprobada. Debes cargar el comprobante de pago del derecho pecuniario para continuar con el trámite.</p></div>
+        <div class="card-body">
+          <p class="note">Tu solicitud fue aprobada. Descarga el recibo de pago de los derechos del examen, realiza el pago y luego carga el comprobante para continuar con el trámite.</p>
+          ${reciboHTML}
+        </div>
       </div>`;
   } else if(r.estado === 'En verificación de pago'){
     resultadoHTML = `
