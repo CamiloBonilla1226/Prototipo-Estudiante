@@ -446,18 +446,39 @@
    El prototipo no se integra con ningún sistema externo.
    ========================================================================= */
 
-/* Origen en la implementación definitiva: sesión del usuario autenticado. */
-const SESION = {
-  nombre:'Nicolás Salazar',
-  codigo:'104620145078',
-  documento:'1004556612',
-  tipoDocumento:'Cédula de Ciudadanía',
-  programa:'Ingeniería de Sistemas',
-  facultad:'Facultad de Ingeniería Electrónica y Telecomunicaciones',
-  periodoCarrera:7,
-  correo:'nsalazar@unicauca.edu.co',
-  telefono:'3184427790'
+/* Origen en la implementación definitiva: sesión del usuario autenticado.
+   PRUEBAS: se simulan dos perfiles de estudiante distintos, cada uno con sus
+   propios datos y su propia lista de materias matriculadas (registro académico
+   simulado), para poder alternar entre ellos y comprobar que el formulario
+   refleja los datos del perfil activo. No hay integración real con SIMCA. */
+const PERFILES = {
+  A:{
+    nombre:'Nicolás Salazar', codigo:'104620145078', documento:'1004556612',
+    tipoDocumento:'Cédula de Ciudadanía', programa:'Ingeniería de Sistemas',
+    facultad:'Facultad de Ingeniería Electrónica y Telecomunicaciones',
+    periodoCarrera:7, correo:'nsalazar@unicauca.edu.co', telefono:'3184427790',
+    asignaturasMatriculadas:[
+      {codigo:'8506105-M', nombre:'Estructuras de Datos'},
+      {codigo:'8506110-M', nombre:'Bases de Datos I'},
+      {codigo:'8506118-M', nombre:'Arquitectura de Computadores'},
+      {codigo:'8506122-M', nombre:'Cálculo en Varias Variables'}
+    ]
+  },
+  B:{
+    nombre:'Mariana Torres Lasso', codigo:'104620145112', documento:'1061456789',
+    tipoDocumento:'Cédula de Ciudadanía', programa:'Ingeniería Electrónica y Telecomunicaciones',
+    facultad:'Facultad de Ingeniería Electrónica y Telecomunicaciones',
+    periodoCarrera:5, correo:'mtorres@unicauca.edu.co', telefono:'3157789021',
+    asignaturasMatriculadas:[
+      {codigo:'8507214-M', nombre:'Señales y Sistemas'},
+      {codigo:'8507230-M', nombre:'Comunicaciones Digitales'},
+      {codigo:'8509118-M', nombre:'Electrónica Analógica II'}
+    ]
+  }
 };
+
+let perfilActivo = 'A';
+let SESION = PERFILES[perfilActivo];
 
 /* PENDIENTE: convención del número de radicado por confirmar. */
 const RADICADO = '2026-ES-0154';
@@ -524,6 +545,15 @@ function fmtHora(h){
 function fmtTam(bytes){ return bytes < 1048576 ? `${Math.max(1,Math.round(bytes/1024))} KB` : `${(bytes/1048576).toFixed(1)} MB`; }
 function extDe(nombre){ const p = nombre.split('.'); return p.length > 1 ? p.pop().toLowerCase() : ''; }
 function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* Opciones del selector de materias, limitadas a las matriculadas por el perfil activo. */
+function opcionesMateriaHTML(codigoSeleccionado){
+  const vacio = `<option value="">Selecciona una asignatura…</option>`;
+  const opts = SESION.asignaturasMatriculadas.map(m =>
+    `<option value="${m.codigo}" ${m.codigo === codigoSeleccionado ? 'selected' : ''}>${esc(m.nombre)} (${m.codigo})</option>`
+  ).join('');
+  return vacio + opts;
+}
 
 /* Suma días hábiles (lunes a viernes) a una fecha. No contempla festivos:
    PENDIENTE — en la implementación definitiva debe consultarse el calendario
@@ -697,6 +727,18 @@ function renderPaso1(){
   return `
     <h2 class="paso-title">Información del solicitante</h2>
     <p class="paso-intro">Estos datos se toman automáticamente de tu sesión y del registro académico. Verifícalos antes de continuar.</p>
+
+    <div class="alert alert-warn" style="align-items:center;">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7A5B1B" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 15.5h.01" stroke-linecap="round"/></svg>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span><b>Solo para pruebas:</b> alterna entre dos perfiles de estudiante simulados para verificar que cada uno trae sus propios datos y materias matriculadas.</span>
+        <select id="fPerfilPrueba" style="height:32px;border:1px solid var(--line);border-radius:3px;padding:0 8px;font-size:12.5px;font-family:inherit;">
+          <option value="A" ${perfilActivo === 'A' ? 'selected' : ''}>Perfil A — ${PERFILES.A.nombre}</option>
+          <option value="B" ${perfilActivo === 'B' ? 'selected' : ''}>Perfil B — ${PERFILES.B.nombre}</option>
+        </select>
+      </div>
+    </div>
+
     <div class="grid-2">
       ${campoRO('Fecha de la solicitud', fmtFechaLarga(isoHoy()))}
       ${campoRO('Nombre', SESION.nombre)}
@@ -820,8 +862,8 @@ function renderPaso2(){
       <div class="subhead" id="secCruce">Asignatura con la que se presentó el cruce</div>
       <div class="grid-3">
         <div class="fld wide ${err('cruceNombre') ? 'has-error' : ''}">
-          <label for="fCruceNombre">Nombre de la asignatura <span class="req">*</span></label>
-          <input type="text" id="fCruceNombre" value="${esc(state.cruceNombre)}" placeholder="Ej. Redes de Computadores">
+          <label for="fCruceNombre">Asignatura <span class="req">*</span></label>
+          <select id="fCruceNombre">${opcionesMateriaHTML(state.cruceCodigo)}</select>
           <div class="err">${err('cruceNombre') ? esc(err('cruceNombre').msg) : ''}</div>
         </div>
         <div class="fld">
@@ -829,8 +871,8 @@ function renderPaso2(){
           <input type="text" id="fCruceGrupo" value="${esc(state.cruceGrupo)}" placeholder="Ej. A">
         </div>
         <div class="fld ${err('cruceCodigo') ? 'has-error' : ''}">
-          <label for="fCruceCodigo">Código de la asignatura <span class="req">*</span></label>
-          <input type="text" id="fCruceCodigo" value="${esc(state.cruceCodigo)}" placeholder="Ej. TEL-3311">
+          <label for="fCruceCodigo">Código de la asignatura</label>
+          <input type="text" id="fCruceCodigo" value="${esc(state.cruceCodigo)}" readonly tabindex="-1">
           <div class="err">${err('cruceCodigo') ? esc(err('cruceCodigo').msg) : ''}</div>
         </div>
       </div>
@@ -888,8 +930,8 @@ function renderPaso2(){
     <div class="subhead" id="secAsig" style="margin-top:0;">Asignatura del examen no presentado</div>
     <div class="grid-3">
       <div class="fld wide ${err('asigNombre') ? 'has-error' : ''}">
-        <label for="fAsigNombre">Nombre de la asignatura <span class="req">*</span></label>
-        <input type="text" id="fAsigNombre" value="${esc(state.asigNombre)}" placeholder="Ej. Redes de Computadores">
+        <label for="fAsigNombre">Asignatura <span class="req">*</span></label>
+        <select id="fAsigNombre">${opcionesMateriaHTML(state.asigCodigo)}</select>
         <div class="err">${err('asigNombre') ? esc(err('asigNombre').msg) : ''}</div>
       </div>
       <div class="fld">
@@ -897,8 +939,8 @@ function renderPaso2(){
         <input type="text" id="fAsigGrupo" value="${esc(state.asigGrupo)}" placeholder="Ej. A">
       </div>
       <div class="fld ${err('asigCodigo') ? 'has-error' : ''}">
-        <label for="fAsigCodigo">Código de la asignatura <span class="req">*</span></label>
-        <input type="text" id="fAsigCodigo" value="${esc(state.asigCodigo)}" placeholder="Ej. TEL-3311">
+        <label for="fAsigCodigo">Código de la asignatura</label>
+        <input type="text" id="fAsigCodigo" value="${esc(state.asigCodigo)}" readonly tabindex="-1">
         <div class="err">${err('asigCodigo') ? esc(err('asigCodigo').msg) : ''}</div>
       </div>
     </div>
@@ -1039,17 +1081,28 @@ function render(){
 function enlazarPaso(){
   const body = $('pasoBody');
 
+  // PRUEBAS: selector de perfil de estudiante (paso 1)
+  const fPerfil = $('fPerfilPrueba');
+  if(fPerfil) fPerfil.addEventListener('change', e => {
+    perfilActivo = e.target.value;
+    SESION = PERFILES[perfilActivo];
+    render();
+  });
+
   // Paso 1
   const tel = $('fTel');
   if(tel) tel.addEventListener('input', e => { state.telefono = e.target.value; });
 
   // Paso 2 — asignatura y fechas del examen no presentado
   const an = $('fAsigNombre');
-  if(an) an.addEventListener('input', e => { state.asigNombre = e.target.value; });
+  if(an) an.addEventListener('change', e => {
+    const materia = SESION.asignaturasMatriculadas.find(m => m.codigo === e.target.value);
+    state.asigNombre = materia ? materia.nombre : '';
+    state.asigCodigo = materia ? materia.codigo : '';
+    render();
+  });
   const ag = $('fAsigGrupo');
   if(ag) ag.addEventListener('input', e => { state.asigGrupo = e.target.value; });
-  const acod = $('fAsigCodigo');
-  if(acod) acod.addEventListener('input', e => { state.asigCodigo = e.target.value; });
   const fn = $('fFechaNo');
   if(fn) fn.addEventListener('change', e => { state.fechaNoPresentado = e.target.value; render(); });
   const fp = $('fFechaProp');
@@ -1079,11 +1132,14 @@ function enlazarPaso(){
 
   // Rama: cruce con otra asignatura
   const cn = $('fCruceNombre');
-  if(cn) cn.addEventListener('input', e => { state.cruceNombre = e.target.value; });
+  if(cn) cn.addEventListener('change', e => {
+    const materia = SESION.asignaturasMatriculadas.find(m => m.codigo === e.target.value);
+    state.cruceNombre = materia ? materia.nombre : '';
+    state.cruceCodigo = materia ? materia.codigo : '';
+    render();
+  });
   const cg = $('fCruceGrupo');
   if(cg) cg.addEventListener('input', e => { state.cruceGrupo = e.target.value; });
-  const ccod = $('fCruceCodigo');
-  if(ccod) ccod.addEventListener('input', e => { state.cruceCodigo = e.target.value; });
   const cf = $('fCruceFecha');
   if(cf) cf.addEventListener('change', e => { state.cruceFecha = e.target.value; });
   const ch = $('fCruceHora');

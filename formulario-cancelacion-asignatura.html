@@ -392,19 +392,40 @@
    ========================================================================= */
 
 /* Origen en la implementación definitiva: sesión del usuario autenticado.
-   Misma información del solicitante que en Cancelación de Matrícula. */
-const SESION = {
-  nombre:'Nicolás Salazar',
-  nombres:'Nicolás',
-  apellidos:'Salazar',
-  codigo:'104620145078',
-  documento:'1004556612',
-  tipoDocumento:'Cédula de Ciudadanía',
-  programa:'Ingeniería de Sistemas',
-  facultad:'Facultad de Ingeniería Electrónica y Telecomunicaciones',
-  periodoCarrera:7,
-  correo:'nsalazar@unicauca.edu.co'
+   PRUEBAS: se simulan dos perfiles de estudiante distintos, cada uno con sus
+   propios datos y su propia lista de materias matriculadas (registro académico
+   simulado), para poder alternar entre ellos y comprobar que el formulario
+   refleja los datos del perfil activo. No hay integración real con SIMCA. */
+const PERFILES = {
+  A:{
+    nombre:'Nicolás Salazar', nombres:'Nicolás', apellidos:'Salazar',
+    codigo:'104620145078', documento:'1004556612', tipoDocumento:'Cédula de Ciudadanía',
+    programa:'Ingeniería de Sistemas',
+    facultad:'Facultad de Ingeniería Electrónica y Telecomunicaciones',
+    periodoCarrera:7, correo:'nsalazar@unicauca.edu.co',
+    asignaturasMatriculadas:[
+      {codigo:'8506105-M', nombre:'Estructuras de Datos'},
+      {codigo:'8506110-M', nombre:'Bases de Datos I'},
+      {codigo:'8506118-M', nombre:'Arquitectura de Computadores'},
+      {codigo:'8506122-M', nombre:'Cálculo en Varias Variables'}
+    ]
+  },
+  B:{
+    nombre:'Mariana Torres Lasso', nombres:'Mariana', apellidos:'Torres Lasso',
+    codigo:'104620145112', documento:'1061456789', tipoDocumento:'Cédula de Ciudadanía',
+    programa:'Ingeniería Electrónica y Telecomunicaciones',
+    facultad:'Facultad de Ingeniería Electrónica y Telecomunicaciones',
+    periodoCarrera:5, correo:'mtorres@unicauca.edu.co',
+    asignaturasMatriculadas:[
+      {codigo:'8507214-M', nombre:'Señales y Sistemas'},
+      {codigo:'8507230-M', nombre:'Comunicaciones Digitales'},
+      {codigo:'8509118-M', nombre:'Electrónica Analógica II'}
+    ]
+  }
 };
+
+let perfilActivo = 'A';
+let SESION = PERFILES[perfilActivo];
 
 /* Origen en la implementación definitiva: registro académico (SIMCA) */
 const PERIODO = {
@@ -559,6 +580,18 @@ function renderPasoSolicitante(){
   return `
     <h2 class="paso-title">Información del solicitante</h2>
     <p class="paso-intro">Estos datos se toman automáticamente de tu sesión y del registro de matrícula. Verifícalos antes de continuar.</p>
+
+    <div class="alert alert-warn" style="align-items:center;">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7A5B1B" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 15.5h.01" stroke-linecap="round"/></svg>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span><b>Solo para pruebas:</b> alterna entre dos perfiles de estudiante simulados para verificar que cada uno trae sus propios datos y materias matriculadas.</span>
+        <select id="fPerfilPrueba" style="height:32px;border:1px solid var(--line);border-radius:3px;padding:0 8px;font-size:12.5px;font-family:inherit;">
+          <option value="A" ${perfilActivo === 'A' ? 'selected' : ''}>Perfil A — ${PERFILES.A.nombre}</option>
+          <option value="B" ${perfilActivo === 'B' ? 'selected' : ''}>Perfil B — ${PERFILES.B.nombre}</option>
+        </select>
+      </div>
+    </div>
+
     <div class="grid-2">
       ${campoRO('Nombre', SESION.nombre)}
       ${campoRO('Programa', SESION.programa)}
@@ -596,6 +629,15 @@ function renderPasoMotivo(){
     </div>`;
 }
 
+/* Opciones del selector de materias, limitadas a las matriculadas por el perfil activo. */
+function opcionesMateriaHTML(codigoSeleccionado){
+  const vacio = `<option value="">Selecciona una asignatura…</option>`;
+  const opts = SESION.asignaturasMatriculadas.map(m =>
+    `<option value="${m.codigo}" ${m.codigo === codigoSeleccionado ? 'selected' : ''}>${esc(m.nombre)} (${m.codigo})</option>`
+  ).join('');
+  return vacio + opts;
+}
+
 function renderPasoAsignaturas(){
   const errs = state.touched[3] ? erroresPaso(3) : [];
   const errGeneral = errs.find(x => x.campo === 'asignaturas');
@@ -605,7 +647,7 @@ function renderPasoAsignaturas(){
   const iconAgregar = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>`;
   return `
     <h2 class="paso-title">Asignaturas a cancelar</h2>
-    <p class="paso-intro">Agrega el código y el nombre de cada asignatura que deseas cancelar del periodo ${PERIODO.periodoAcademico}. Puedes agregar varias si necesitas cancelar más de una. Usa "Editar" para corregir una asignatura ya agregada o "Eliminar" para quitarla de la lista.</p>
+    <p class="paso-intro">Selecciona, de tus materias matriculadas en el periodo ${PERIODO.periodoAcademico}, cada asignatura que deseas cancelar. Puedes agregar varias si necesitas cancelar más de una. Usa "Editar" para corregir una asignatura ya agregada o "Eliminar" para quitarla de la lista.</p>
 
     <div id="asigSeccion">
       <div style="margin-bottom:12px;">
@@ -628,11 +670,9 @@ function renderPasoAsignaturas(){
             ${ASIGNATURAS.map((x,i) => {
               const editando = state.asigEditando.has(i);
               return `<tr>
-              <td class="cod">${editando
-                ? `<input type="text" class="tbl-input" data-asig-codigo="${i}" value="${esc(x.codigo)}" placeholder="Ej. TEL-3204" autofocus>`
-                : `<span class="asig-view">${esc(x.codigo) || '—'}</span>`}</td>
+              <td class="cod">${esc(x.codigo) || '—'}</td>
               <td>${editando
-                ? `<input type="text" class="tbl-input" data-asig-nombre="${i}" value="${esc(x.nombre)}" placeholder="Nombre de la asignatura">`
+                ? `<select class="tbl-input" data-asig-select="${i}" autofocus>${opcionesMateriaHTML(x.codigo)}</select>`
                 : `<span class="asig-view">${esc(x.nombre) || '—'}</span>`}</td>
               <td class="num asig-acciones">
                 <div class="asig-btns">
@@ -755,6 +795,14 @@ function render(){
    ENLACE DE EVENTOS POR PASO
    ========================================================================= */
 function enlazarPaso(){
+  // PRUEBAS: selector de perfil de estudiante (paso Información del solicitante)
+  const fPerfil = $('fPerfilPrueba');
+  if(fPerfil) fPerfil.addEventListener('change', e => {
+    perfilActivo = e.target.value;
+    SESION = PERFILES[perfilActivo];
+    render();
+  });
+
   const desc = $('fDesc');
   if(desc) desc.addEventListener('input', e => {
     state.descripcion = e.target.value;
@@ -787,15 +835,13 @@ function enlazarPaso(){
     render();
   });
 
-  // Paso 3 — asignaturas: editar código/nombre
-  document.querySelectorAll('[data-asig-codigo]').forEach(inp => {
-    inp.addEventListener('input', e => {
-      ASIGNATURAS[Number(e.target.dataset.asigCodigo)].codigo = e.target.value;
-    });
-  });
-  document.querySelectorAll('[data-asig-nombre]').forEach(inp => {
-    inp.addEventListener('input', e => {
-      ASIGNATURAS[Number(e.target.dataset.asigNombre)].nombre = e.target.value;
+  // Paso 3 — asignaturas: seleccionar la materia matriculada de la fila
+  document.querySelectorAll('[data-asig-select]').forEach(sel => {
+    sel.addEventListener('change', e => {
+      const i = Number(e.target.dataset.asigSelect);
+      const materia = SESION.asignaturasMatriculadas.find(m => m.codigo === e.target.value);
+      ASIGNATURAS[i] = materia ? {codigo:materia.codigo, nombre:materia.nombre} : {codigo:'', nombre:''};
+      render();
     });
   });
 
