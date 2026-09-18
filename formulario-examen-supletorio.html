@@ -738,16 +738,6 @@ function renderPaso1(){
     <h2 class="paso-title">Información del solicitante</h2>
     <p class="paso-intro">Estos datos se toman automáticamente de tu sesión y del registro académico. Verifícalos antes de continuar.</p>
 
-    <div class="alert alert-warn" style="align-items:center;">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7A5B1B" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 15.5h.01" stroke-linecap="round"/></svg>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-        <span><b>Solo para pruebas:</b> alterna entre dos perfiles de estudiante simulados para verificar que cada uno trae sus propios datos y materias matriculadas.</span>
-        <select id="fPerfilPrueba" style="height:32px;border:1px solid var(--line);border-radius:3px;padding:0 8px;font-size:12.5px;font-family:inherit;">
-          <option value="A" ${perfilActivo === 'A' ? 'selected' : ''}>Perfil A — ${PERFILES.A.nombre}</option>
-          <option value="B" ${perfilActivo === 'B' ? 'selected' : ''}>Perfil B — ${PERFILES.B.nombre}</option>
-        </select>
-      </div>
-    </div>
 
     <div class="grid-2">
       ${campoRO('Fecha de la solicitud', fmtFechaLarga(isoHoy()))}
@@ -1090,15 +1080,6 @@ function render(){
    ========================================================================= */
 function enlazarPaso(){
   const body = $('pasoBody');
-
-  // PRUEBAS: selector de perfil de estudiante (paso 1)
-  const fPerfil = $('fPerfilPrueba');
-  if(fPerfil) fPerfil.addEventListener('change', e => {
-    perfilActivo = e.target.value;
-    try{ localStorage.setItem(PERFIL_KEY, perfilActivo); }catch(err){ /* almacenamiento no disponible */ }
-    SESION = PERFILES[perfilActivo];
-    render();
-  });
 
   // Paso 1
   const tel = $('fTel');
