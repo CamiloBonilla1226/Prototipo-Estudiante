@@ -477,7 +477,17 @@ const PERFILES = {
   }
 };
 
-let perfilActivo = 'A';
+/* El perfil activo se comparte con index.html y con los otros formularios a
+   través de localStorage, así que alternar el perfil desde el menú de usuario
+   ("Cambiar perfil") también se refleja aquí al abrir o recargar la página. */
+const PERFIL_KEY = 'acbb_perfil_activo';
+function obtenerPerfilActivo(){
+  try{
+    const v = localStorage.getItem(PERFIL_KEY);
+    return (v === 'A' || v === 'B') ? v : 'A';
+  }catch(err){ return 'A'; }
+}
+let perfilActivo = obtenerPerfilActivo();
 let SESION = PERFILES[perfilActivo];
 
 /* PENDIENTE: convención del número de radicado por confirmar. */
@@ -1085,6 +1095,7 @@ function enlazarPaso(){
   const fPerfil = $('fPerfilPrueba');
   if(fPerfil) fPerfil.addEventListener('change', e => {
     perfilActivo = e.target.value;
+    try{ localStorage.setItem(PERFIL_KEY, perfilActivo); }catch(err){ /* almacenamiento no disponible */ }
     SESION = PERFILES[perfilActivo];
     render();
   });

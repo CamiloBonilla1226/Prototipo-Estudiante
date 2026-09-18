@@ -98,6 +98,8 @@
     text-align:left;font-family:inherit;
   }
   .user-dropdown-item:hover{background:#FBE9E7;}
+  .user-dropdown-item.is-neutral{color:var(--navy-ink);}
+  .user-dropdown-item.is-neutral:hover{background:var(--panel);}
   .user-dropdown-item:focus-visible{outline:2px solid #B9C7EE;outline-offset:1px;}
 
   /* ---------- Content ---------- */
@@ -479,15 +481,19 @@
       <h1 class="app-title">Gestión de Procesos Académicos FIET</h1>
       <div class="user-chip">
         <button class="user-chip-btn" id="userMenuBtn" aria-haspopup="true" aria-expanded="false">
-          <div class="avatar">NS</div>
+          <div class="avatar" id="topAvatar">NS</div>
           <div class="user-meta">
-            <div class="user-name">Nicolás Salazar</div>
+            <div class="user-name" id="topNombre">Nicolás Salazar</div>
             <div class="user-role">Estudiante
               <svg width="9" height="6" viewBox="0 0 10 6" fill="none" stroke="#1F2A6D" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg>
             </div>
           </div>
         </button>
         <div class="user-dropdown" id="userDropdown" hidden>
+          <button class="user-dropdown-item is-neutral" id="btnCambiarPerfil" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1F2A6D" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+            Cambiar perfil
+          </button>
           <button class="user-dropdown-item" id="btnLogout" type="button">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B23B2E" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
             Cerrar sesión
@@ -504,16 +510,16 @@
       <section id="view-usuario">
         <div class="card user-card">
           <div class="card-body user-card-body">
-            <h2 class="user-welcome">Bienvenid@, Nicolás!</h2>
+            <h2 class="user-welcome" id="uBienvenida">Bienvenid@, Nicolás!</h2>
             <div class="user-grid">
               <div class="user-side">
-                <div class="user-avatar-big">NS</div>
+                <div class="user-avatar-big" id="uAvatarBig">NS</div>
                 <div class="user-joined">
                   <span>Te uniste el :</span>
-                  <b>12/08/2022</b>
+                  <b id="uFechaIngreso">12/08/2022</b>
                 </div>
               </div>
-              <dl class="user-fields">
+              <dl class="user-fields" id="uCampos">
                 <dt>Código:</dt><dd>104620145078</dd>
                 <dt>N° identificación:</dt><dd>1004556612</dd>
                 <dt>Tipo de documento:</dt><dd>Cédula de Ciudadanía</dd>
@@ -529,11 +535,11 @@
 
             <div class="user-roles">
               <div class="user-roles-title">Programa académico:</div>
-              <div>Ingeniería Electrónica y Telecomunicaciones</div>
+              <div id="uPrograma">Ingeniería de Sistemas</div>
             </div>
             <div class="user-roles">
               <div class="user-roles-title">Semestre actual:</div>
-              <div>7°</div>
+              <div id="uSemestre">7°</div>
             </div>
           </div>
         </div>
@@ -815,6 +821,82 @@
 
 <script>
 if('scrollRestoration' in history){ history.scrollRestoration = 'manual'; }
+
+/* =========================================================
+   PRUEBAS: dos perfiles de estudiante mock para alternar desde el menú de
+   usuario ("Cambiar perfil"). El perfil activo se guarda en localStorage
+   para que formulario-cancelacion-matricula.html, formulario-cancelacion-
+   asignatura.html y formulario-examen-supletorio.html —cada uno una página
+   distinta— lean el mismo perfil activo y muestren las mismas materias
+   matriculadas. No hay integración real con SIMCA ni con ningún backend.
+   ========================================================= */
+const PERFILES = {
+  A:{
+    nombre:'Nicolás Salazar', nombres:'Nicolás', apellidos:'Salazar',
+    codigo:'104620145078', documento:'1004556612', tipoDocumento:'Cédula de Ciudadanía',
+    programa:'Ingeniería de Sistemas',
+    facultad:'Facultad de Ingeniería Electrónica y Telecomunicaciones',
+    periodoCarrera:7, correo:'nsalazar@unicauca.edu.co', telefono:'3128894521',
+    usuario:'nsalazar', fechaIngreso:'12/08/2022',
+    asignaturasMatriculadas:[
+      {codigo:'8506105-M', nombre:'Estructuras de Datos'},
+      {codigo:'8506110-M', nombre:'Bases de Datos I'},
+      {codigo:'8506118-M', nombre:'Arquitectura de Computadores'},
+      {codigo:'8506122-M', nombre:'Cálculo en Varias Variables'}
+    ]
+  },
+  B:{
+    nombre:'Mariana Torres Lasso', nombres:'Mariana', apellidos:'Torres Lasso',
+    codigo:'104620145112', documento:'1061456789', tipoDocumento:'Cédula de Ciudadanía',
+    programa:'Ingeniería Electrónica y Telecomunicaciones',
+    facultad:'Facultad de Ingeniería Electrónica y Telecomunicaciones',
+    periodoCarrera:5, correo:'mtorres@unicauca.edu.co', telefono:'3157789021',
+    usuario:'mtorres', fechaIngreso:'03/02/2023',
+    asignaturasMatriculadas:[
+      {codigo:'8507214-M', nombre:'Señales y Sistemas'},
+      {codigo:'8507230-M', nombre:'Comunicaciones Digitales'},
+      {codigo:'8509118-M', nombre:'Electrónica Analógica II'}
+    ]
+  }
+};
+const PERFIL_KEY = 'acbb_perfil_activo';
+function obtenerPerfilActivo(){
+  try{
+    const v = localStorage.getItem(PERFIL_KEY);
+    return (v === 'A' || v === 'B') ? v : 'A';
+  }catch(err){ return 'A'; }
+}
+let perfilActivo = obtenerPerfilActivo();
+let SESION = PERFILES[perfilActivo];
+
+function renderPerfilActivo(){
+  const s = SESION;
+  const iniciales = ((s.nombres[0] || '') + (s.apellidos ? s.apellidos[0] : '')).toUpperCase();
+  document.getElementById('topAvatar').textContent = iniciales;
+  document.getElementById('topNombre').textContent = s.nombre;
+  document.getElementById('uBienvenida').textContent = `Bienvenid@, ${s.nombres}!`;
+  document.getElementById('uAvatarBig').textContent = iniciales;
+  document.getElementById('uFechaIngreso').textContent = s.fechaIngreso;
+  document.getElementById('uCampos').innerHTML = `
+    <dt>Código:</dt><dd>${s.codigo}</dd>
+    <dt>N° identificación:</dt><dd>${s.documento}</dd>
+    <dt>Tipo de documento:</dt><dd>${s.tipoDocumento}</dd>
+    <dt>Nombres:</dt><dd>${s.nombres}</dd>
+    <dt>Apellidos:</dt><dd>${s.apellidos}</dd>
+    <dt>Teléfono:</dt><dd>${s.telefono}</dd>
+    <dt>Usuario:</dt><dd>${s.usuario}</dd>
+    <dt>Correo:</dt><dd>${s.correo}</dd>`;
+  document.getElementById('uPrograma').textContent = s.programa;
+  document.getElementById('uSemestre').textContent = s.periodoCarrera + '°';
+}
+
+function cambiarPerfil(){
+  perfilActivo = perfilActivo === 'A' ? 'B' : 'A';
+  try{ localStorage.setItem(PERFIL_KEY, perfilActivo); }catch(err){ /* almacenamiento no disponible */ }
+  SESION = PERFILES[perfilActivo];
+  renderPerfilActivo();
+  mostrarToast(`<b>Perfil cambiado.</b><br>Ahora estás viendo la sesión de ${SESION.nombre}.`);
+}
 
 /* =========================================================
    Datos simulados — trámites radicados por el Estudiante
@@ -1391,7 +1473,12 @@ document.getElementById('btnLogout').addEventListener('click', () => {
   cerrarMenuUsuario();
   mostrarToast('<b>Sesión cerrada.</b><br>Has salido de Gestión de Procesos Académicos FIET.');
 });
+document.getElementById('btnCambiarPerfil').addEventListener('click', () => {
+  cerrarMenuUsuario();
+  cambiarPerfil();
+});
 
+renderPerfilActivo();
 render();
 /* Al recargar la página (F5) siempre debe ir a "Mi usuario", sin importar el hash
    que haya quedado en la URL. El hash solo se respeta cuando se llega aquí por una
