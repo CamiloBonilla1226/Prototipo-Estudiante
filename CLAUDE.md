@@ -26,24 +26,30 @@ Esta carpeta cubre **únicamente el panel del Estudiante y sus tres
 formularios de solicitud**. Los paneles de Funcionario y Decano viven en
 otras carpetas, cada una con su propio `CLAUDE.md`; no los edites desde aquí.
 
-## 2. DECISIÓN CLAVE — la Resolución es 100% física, no se toca en código
+## 2. DECISIÓN CLAVE — la Resolución nunca se firma digitalmente, pero su escaneo sí es descargable (CM/CA)
 
-Por reglamento de la Universidad del Cauca **no se admiten firmas digitales**.
-Esto ya está reflejado en el código actual y **debe mantenerse así**:
+Por reglamento de la Universidad del Cauca **no se admiten firmas digitales**:
+la Resolución (documento que aprueba o rechaza el trámite) siempre se firma
+de forma física, nunca en la aplicación. **Decisión ya validada con el
+usuario (2026-09-30):** una vez firmada físicamente, el Funcionario Académico
+sube su escaneo (PDF) y el Estudiante puede descargarlo desde la app. Esto
+resuelve el punto que antes quedaba pendiente de una próxima reunión.
 
-- La Resolución (documento que aprueba o rechaza el trámite) **nunca se
-  genera, sube, escanea ni descarga desde la aplicación**. No implementes
-  botones de "Generar PDF", "Adjuntar resolución" ni similares.
-- Cuando el Estudiante ve que su solicitud fue aprobada, el mensaje que debe
-  mostrarse es puramente textual: debe acercarse a la Decanatura de la FIET
-  dentro de los cinco (5) días siguientes a firmar la Resolución físicamente.
-  No hay ningún archivo adjunto en ese punto (ver `estudiante.html`, función
-  de detalle, línea ~944).
-- **Pendiente de decisión (próxima reunión):** aún no se sabe si en algún
-  momento se subirá un **escaneo** de la Resolución ya firmada físicamente,
-  como archivo digital para consulta. Mientras no se confirme, no implementes
-  nada relacionado con esto; si el requerimiento lo pide, señálalo como punto
-  abierto en vez de inventar una solución.
+- Aplica **solo** a Cancelación de Matrícula y Cancelación de Asignatura.
+  **Examen Supletorio nunca genera Resolución** y nunca debe mostrar ni pedir
+  este documento en ningún diálogo o vista de solo lectura.
+- Aplica tanto si el trámite terminó **Aprobada** como **Rechazada** (en
+  ambos casos puede o no haber `r.resolucion`; si no hay, se muestra el
+  mensaje textual de que aún no está disponible el escaneo). Cuando el
+  trámite fue Rechazada, el escaneo de la Resolución se muestra **junto
+  con** el motivo del rechazo, no en su lugar (ver `index.html`, función
+  `abrirDetallePagina`, bloque "Resultado").
+- Lo que sigue sin existir es la firma digital en sí: no se genera la
+  Resolución desde la app, no se firma electrónicamente, y no se simula ese
+  paso. Solo se digitaliza (escanea) una Resolución que ya fue firmada en
+  papel.
+- Formatos aceptados para este escaneo: igual que otros anexos (PDF
+  principalmente).
 
 ## 3. Modelo de estados (vocabulario propio del Estudiante)
 
@@ -90,8 +96,9 @@ de la solicitud.
 - Declaración de veracidad (checkbox obligatorio).
 - **No genera Resolución en este formulario**: el pie del formulario aclara
   que el Decano determinará mediante resolución motivada la situación de
-  cada asignatura — esa resolución es posterior y física, no un output del
-  formulario.
+  cada asignatura — esa resolución se firma físicamente después, y su
+  escaneo (si el Funcionario lo sube) se consulta luego en el módulo de
+  Respuestas (ver sección 2).
 
 ### 5.2. Cancelación de Asignatura (`formulario-cancelacion-asignatura.html`)
 - Motivo de la cancelación: texto (mín. 50 caracteres) + soporte opcional.
@@ -122,15 +129,19 @@ de la solicitud.
   aprueba, el Estudiante debe cargar un comprobante de pago (PDF/JPG/PNG,
   obligatorio) antes de que el Funcionario lo verifique y cierre el trámite.
   Este comprobante es un archivo real de la app — no confundir con la
-  Resolución, que sigue siendo siempre física.
+  Resolución, que se firma siempre de forma física.
 - Este proceso **no genera Resolución** en ningún punto (ver nota en
   `formulario-examen-supletorio.html` ~línea 1272): la decisión se comunica
-  directamente al Estudiante.
+  directamente al Estudiante. A diferencia de Cancelación de Matrícula y de
+  Asignatura, aquí tampoco aplica el escaneo descargable de la Resolución
+  (sección 2): Examen Supletorio nunca tiene ese documento.
 
 ## 6. Reglas transversales de los formularios
 
-- Formatos aceptados: PDF, JPG y PNG para anexos y comprobantes (nunca para
-  la Resolución, que no es un archivo).
+- Formatos aceptados: PDF, JPG y PNG para anexos y comprobantes. La
+  Resolución solo se maneja como PDF (escaneo de la firma física) y solo
+  aplica a Cancelación de Matrícula y Cancelación de Asignatura (ver
+  sección 2).
 - Los formularios que exigen adjuntos deben bloquear el envío y mostrar
   mensaje de validación si falta el archivo obligatorio.
 - **Hay banderas de "modo prueba" activas por defecto** en los tres
@@ -155,10 +166,12 @@ Tipografía sans-serif institucional. Sin sombras pronunciadas ni degradados.
 
 ## 8. Qué NO hacer aquí
 
-- No generar, adjuntar, descargar ni simular la firma digital de una
-  Resolución en ningún punto del panel del Estudiante o de los formularios.
-- No inventar la respuesta al punto abierto del escaneo de la Resolución
-  firmada — está pendiente de definir en la próxima reunión.
+- No simular ni generar una firma digital de la Resolución: la Resolución
+  siempre se firma físicamente primero; la app solo permite consultar su
+  escaneo posterior (CM/CA, sección 2). No agregues botones de "Generar
+  Resolución" ni de firma electrónica.
+- No mostrar ni pedir Resolución para Examen Supletorio, en ningún diálogo
+  ni vista de solo lectura — ese proceso nunca la genera.
 - No tocar archivos de las carpetas de Funcionario o Decano desde aquí.
 - No agregar backend real ni reemplazar el bridge de `localStorage` sin que
   se pida explícitamente.

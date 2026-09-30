@@ -939,6 +939,7 @@ const DATA = [
   },
   {
     rad:'2026-CA-0150', proc:PROC.CA, fecha:'2026-07-30T14:20', estado:'Aprobada', decision:'Aprobada',
+    resolucion:'Resolución 0150-2026.pdf',
     just:'Solicito la cancelación de la asignatura Redes de Computadores por incompatibilidad de horario con la práctica empresarial.',
     anexos:['Solicitud firmada.pdf','Carta de coordinación.pdf'],
     asignaturas:[{cod:'8511112-M', nombre:'Redes de Computadores', faltas:6, nota:'2.8', sitMatricula:'R0', sitCancelar:'R0'}],
@@ -949,7 +950,9 @@ const DATA = [
     ]
   },
   {
-    rad:'2026-CM-0140', proc:PROC.CM, fecha:'2026-07-20T09:00', estado:'Rechazada', decision:'Rechazada', observacion:'La certificación laboral presentada no acredita el traslado fuera de la ciudad durante el periodo académico vigente.',
+    rad:'2026-CM-0140', proc:PROC.CM, fecha:'2026-07-20T09:00', estado:'Rechazada', decision:'Rechazada',
+    resolucion:'Resolución 0140-2026.pdf',
+    observacion:'La certificación laboral presentada no acredita el traslado fuera de la ciudad durante el periodo académico vigente.',
     just:'Solicito la cancelación de matrícula por traslado laboral fuera de la ciudad de Popayán.',
     anexos:['Solicitud firmada.pdf','Carta laboral.pdf','Historia académica.pdf'],
     asignaturas:[
@@ -1264,23 +1267,46 @@ function abrirDetallePagina(rad){
     document.getElementById('dComprobante').innerHTML = '';
   }
 
-  /* ---- Resultado: decisión / resolución / motivo de rechazo / pago (a lo ancho, debajo de los anexos) ---- */
+  /* ---- Resultado: decisión / resolución / motivo de rechazo / pago (a lo ancho, debajo de los anexos) ----
+     La Resolución académica (PDF escaneado) solo aplica a Cancelación de Matrícula y Cancelación de
+     Asignatura (nunca a Examen Supletorio), tanto si el trámite terminó Aprobada como Rechazada. Sigue sin
+     existir firma digital: lo que se sube es el escaneo de la Resolución ya firmada físicamente.
+     TODO (backend real): al insertar r.resolucion debería registrarse en HISTORIAL_SOLICITUD_ACADEMICA una
+     fila con acción "Resolución subida", con FuncionarioAcademico_uuid como autor (ver
+     claude/script_bd_extension.sql y claude/diccionario-datos-extension.md, tabla RESOLUCION_ACADEMICA). */
   let resultadoHTML = '';
+  const esES = r.proc === PROC.ES;
   if(r.estado === 'Aprobada'){
-    const esES = r.proc === PROC.ES;
-    const notaResolucion = esES
-      ? 'Este proceso no genera Resolución. La decisión ya fue comunicada directamente a ti a través de este sistema.'
-      : 'Tu solicitud fue aprobada. Por reglamento de la Universidad del Cauca no se admiten firmas digitales: la Resolución se firma únicamente de forma física. Acércate a la Decanatura de la FIET dentro de los cinco (5) días siguientes a la firma de la Resolución para conocer el resultado formal de tu trámite.';
-    resultadoHTML = `
-      <div class="card">
-        <div class="card-head"><h2>Resolución</h2></div>
-        <div class="card-body"><div class="resolucion-note">${notaResolucion}</div></div>
-      </div>`;
+    if(!esES && r.resolucion){
+      resultadoHTML = `
+        <div class="card">
+          <div class="card-head"><h2>Resolución</h2></div>
+          <div class="card-body">
+            <p class="note">Tu solicitud fue aprobada. La Resolución se firma únicamente de forma física; este es el escaneo de la Resolución ya firmada, disponible para tu consulta.</p>
+            <ul class="anexos">${anexosHTML([r.resolucion])}</ul>
+          </div>
+        </div>`;
+    } else {
+      const notaResolucion = esES
+        ? 'Este proceso no genera Resolución. La decisión ya fue comunicada directamente a ti a través de este sistema.'
+        : 'Tu solicitud fue aprobada. Por reglamento de la Universidad del Cauca no se admiten firmas digitales: la Resolución se firma únicamente de forma física. En cuanto esté disponible el escaneo de la Resolución firmada, podrás consultarla aquí.';
+      resultadoHTML = `
+        <div class="card">
+          <div class="card-head"><h2>Resolución</h2></div>
+          <div class="card-body"><div class="resolucion-note">${notaResolucion}</div></div>
+        </div>`;
+    }
   } else if(r.estado === 'Rechazada'){
+    const resolucionHTML = (!esES && r.resolucion) ? `
+      <div class="modal-sub">Resolución</div>
+      <ul class="anexos">${anexosHTML([r.resolucion])}</ul>` : '';
     resultadoHTML = `
       <div class="card">
         <div class="card-head"><h2>Motivo del rechazo</h2></div>
-        <div class="card-body"><div class="just">${r.observacion || 'No se registró una observación.'}</div></div>
+        <div class="card-body">
+          <div class="just">${r.observacion || 'No se registró una observación.'}</div>
+          ${resolucionHTML}
+        </div>
       </div>`;
   } else if(r.estado === 'Pendiente de pago'){
     const reciboHTML = r.recibo ? `
